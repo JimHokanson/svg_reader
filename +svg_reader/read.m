@@ -1,17 +1,14 @@
-function read(file_path)
+function svg = read(file_path)
 %
 %   svg_reader.read
 
-xDoc = xmlread(file_path);
+xml_doc = xmlread(file_path);
 
-svg=struct();
-imagesXml = xDoc.getElementsByTagName('image');
-svg.images=cell(1,imagesXml.getLength);
-for k=0:imagesXml.getLength - 1
-    item=imagesXml.item(k);
-    svg.images{k+1} = svg_reader.image(item);
-    svg.images{k+1}=img;
-end
+%should be SVG
+root_node = xml_doc.getDocumentElement();
+svg = svg_reader.element.svg(root_node);
 
+%propogate style?
+svg.applyStyle([]);
 
 end

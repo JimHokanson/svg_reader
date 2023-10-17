@@ -8,13 +8,15 @@ classdef image < handle
     %other SVG files. Animated GIF behavior is undefined.
     
     properties
+        parent;
         attributes
         img_binary
         format
     end
 
     methods
-        function obj = image(item)
+        function obj = image(item,parent)
+            obj.parent = parent;
             s = svg_reader.utils.getAttributes(item);
             obj.attributes = s;
             if isfield(s,'xlink_href')
