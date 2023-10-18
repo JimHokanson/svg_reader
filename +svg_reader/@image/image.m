@@ -1,4 +1,4 @@
-classdef image < handle
+classdef image < svg_reader.element
     %
     %   
 
@@ -8,8 +8,7 @@ classdef image < handle
     %other SVG files. Animated GIF behavior is undefined.
     
     properties
-        parent;
-        attributes
+        parent
         img_binary
         format
     end
@@ -17,8 +16,9 @@ classdef image < handle
     methods
         function obj = image(item,parent)
             obj.parent = parent;
-            s = svg_reader.utils.getAttributes(item);
-            obj.attributes = s;
+            obj.getAttributes(item);
+            s = obj.attributes;
+
             if isfield(s,'xlink_href')
                 xlink = s.xlink_href;
                 ref = 'data:image/png;base64,';
@@ -36,6 +36,20 @@ classdef image < handle
                 end
             end
             %data = obj.getImageData();
+        end
+        function render(obj)
+            %What's the viewport???
+            %
+            %   Don't worry about for now
+
+            
+
+            if isfield(obj.attributes,'transform')
+                %TODO: Apply transform
+            end
+
+            data = obj.getImageData();
+            im = image(data);
         end
         function data = getImageData(obj)
             %TODO: This should be cached locally

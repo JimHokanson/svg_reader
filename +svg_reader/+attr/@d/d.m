@@ -65,13 +65,29 @@ classdef d < handle
             obj.command_inputs = inputs;
         end
         function [x,y] = getXY(obj,n_points_per_step)
-            currentX = 0;
-            currentY = 0;
+            cx = 0;
+            cy = 0;
+            x = [];
+            y = [];
+            %TODO: Optimization, estimate # of points (or calculate)
+            %and preinitialize
             n_commands = length(obj.commands);
-            for i = 1:length(n_commands)
+            for i = 1:n_commands
+                inputs = obj.command_inputs{i};
                 switch obj.commands{i}
                     case 'M'
-                        keyboard
+                        if i ~= 1
+                            %Need NaNs to break up
+                            error('not yet handled')
+                        end
+                        %TODO: check length
+                        %(x, y)+
+                        cx = inputs(1);
+                        cy = inputs(2);
+                        for j = 3:2:length(inputs)
+                            %implicit Ls
+                            error('Not yet implemented')
+                        end
                     case 'm'
                         keyboard
                     case 'l'
@@ -89,7 +105,33 @@ classdef d < handle
                     case 'C'
                         keyboard
                     case 'c'
-                        keyboard
+                        %TODO: check that length is 6
+                        %(dx1,dy1, dx2,dy2, dx,dy)+
+                        %Po′ = Pn = {xo + dx, yo + dy} ;
+                        %Pcs = {xo + dx1, yo + dy1} ;
+                        %Pce = {xo + dx2, yo + dy2}
+
+                        %Po - start
+                        %Pn - end
+                        %Pcs - P1
+                        %Pce - P2
+                        t = linspace(0, 1, n_points_per_step);
+                        for j = 1:6:length(inputs)
+                            P0x = cx;
+                            P0y = cy;
+                            P1x = cx + inputs(j);
+                            P1y = cy + inputs(j+1);
+                            P2x = cx + inputs(j+2);
+                            P2y = cy + inputs(j+3);
+                            P3x = cx + inputs(j+4);
+                            P3y = cx + inputs(j+5);
+                            X = (1 - t).^3 * P0x + 3*(1 - t).^2 .*t .* P1x + 3 * (1 - t) .* t.^2 * P2x + t.^3 * P3x;
+                            Y = (1 - t).^3 * P0y + 3*(1 - t).^2 .*t .* P1y + 3 * (1 - t) .* t.^2 * P2y + t.^3 * P3y;
+                            x = [x X]; %#ok<AGROW> 
+                            y = [y Y]; %#ok<AGROW> 
+                            cx = P3x;
+                            cy = P3y;
+                        end
                     case 'S'
                         keyboard
                     case 's'

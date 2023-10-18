@@ -9,7 +9,6 @@ classdef style < svg_reader.element
 
     properties
         parent
-        attributes
         class_names
         class_styles
         id_names
@@ -20,8 +19,7 @@ classdef style < svg_reader.element
     methods
         function obj = style(item,parent)
             obj.parent = parent;
-            s = svg_reader.utils.getAttributes(item);
-            obj.attributes = s;
+            obj.getAttributes(item);
             obj.raw_value = strtrim(char(item.getTextContent()));
             %{
                 %class example
@@ -76,21 +74,60 @@ classdef style < svg_reader.element
             obj.id_names = names(~is_class);
             obj.id_styles = styles(~is_class);
         end
-        function s = mergeStyles(obj,s)
+        function [s,changed_fields] = mergeStyles(obj,s)
+            %
+            %
+            %   Inputs
+            %   ------
+            %   s : struct
             %
             %   See Also
             %   --------
             %   svg_reader.element.applyStyle
+            %
+            
+
+            changed_fields = {};
+
+            %Note, if we add element type
+            %support we'll need a check for that
             if isfield(s,'id')
-                s = style_use.mergeStyles(s);
+                mask = strcmp(s.id,obj.id_names);
+                %TODO: Check for single match
+                if any(mask)
+                    style_data = obj.id_styles{mask};
+                    fn = fieldnames(style_data);
+                    for i = 1:length(fn)
+                        name = fn{i};
+                        s.(name) = style_data.(name);
+                        changed_fields{end+1} = name;
+                    end
+                end
             end
             if isfield(s,'class')
-                s = style_use.mergeStyles(s);
+                mask = strcmp(s.class,obj.class_names);
+                %TODO: Check for single match
+                if any(mask)
+                    style_data = obj.class_styles{mask};
+                    fn = fieldnames(style_data);
+                    for i = 1:length(fn)
+                        name = fn{i};
+                        s.(name) = style_data.(name);
+                        changed_fields{end+1} = name;
+                    end
+                end
             end
-            keyboard
+            
+        end
+        function render(obj)
+            %NOOP
         end
         function applyStyle(obj,other_style)
             %NOOP
+            %
+            %   See Also
+            %   --------
+            %   svg_reader.element.applyStyle
         end
     end
 end

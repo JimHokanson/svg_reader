@@ -1,4 +1,4 @@
-classdef polyline < handle
+classdef polyline < svg_reader.element
     %
     %   Class:
     %   svg_reader.element.polyline
@@ -18,19 +18,27 @@ classdef polyline < handle
     %??? What is the point of pathLength?
 
     properties
-        attributes
+        parent
+
+        % [x1 y1;
+        %  x2 y2;
+        %  etc. ]
         points
     end
 
     methods
         function obj = polyline(item,parent)
-            s = svg_reader.utils.getAttributes(item);
-            obj.attributes = s;
+            obj.parent = parent;
+            obj.getAttributes(item);
+            s = obj.attributes;
             
             number_pattern = '-?\d+.?\d+';
             temp = regexp(s.points,number_pattern,'match');
             temp2 = str2double(temp);
             obj.points = [temp2(1:2:end)' temp2(2:2:end)'];
+        end
+        function render(obj)
+            keyboard
         end
     end
 end

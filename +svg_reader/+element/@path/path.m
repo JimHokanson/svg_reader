@@ -1,4 +1,4 @@
-classdef path < handle
+classdef path < svg_reader.element
     %
     %   Class
     %   svg_reader.element.path
@@ -7,16 +7,17 @@ classdef path < handle
 
     properties
         parent
-        attributes
-        d
+
+        %svg_reader.attr.d
+        d svg_reader.attr.d
     end
 
     methods
         function obj = path(item,parent)
             obj.parent = parent;
-            s = svg_reader.utils.getAttributes(item);
-            obj.attributes = s;
-    
+            obj.getAttributes(item);
+            s = obj.attributes;
+
             %{
 
             SVG defines 6 types of path commands, 
@@ -31,10 +32,24 @@ classdef path < handle
             %}
             obj.d = svg_reader.attr.d(s.d,obj);
         end
+        function render(obj)
+            %TODO: Expose this ...
+            n_points_per_step = 10;
+            [x,y] = obj.getXY(n_points_per_step);
+            
+            %TODO: Make this more generic
+            s = obj.attributes;
+            if isfield(s,'stroke')
+                c = svg_reader.utils.getColor(s.stroke);
+            end
+            keyboard
+        end
         function [x,y] = getXY(obj,n_points_per_step)
             %
             %
-            
+
+            %See: svg_reader.attr.d.getXY
+            [x,y] = obj.d.getXY(n_points_per_step);
         end
     end
 end

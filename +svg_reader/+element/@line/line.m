@@ -1,4 +1,4 @@
-classdef line < handle
+classdef line < svg_reader.element
     %
     %   Class:
     %   svg_reader.element.line
@@ -28,7 +28,6 @@ classdef line < handle
 
     properties
         parent
-        attributes
         x
         y
     end
@@ -36,10 +35,13 @@ classdef line < handle
     methods
         function obj = line(item,parent)
             obj.parent = parent;
-            s = svg_reader.utils.getAttributes(item);
-            obj.attributes = s;
+            obj.getAttributes(item);
+            s = obj.attributes;
             obj.x = str2double({s.x1 s.x2});
             obj.y = str2double({s.y1 s.y2});
+        end
+        function render(obj)
+            keyboard
         end
     end
 end

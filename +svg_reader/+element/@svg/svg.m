@@ -4,7 +4,6 @@ classdef svg < svg_reader.element
     %   svg_reader.element.svg
 
     properties
-        attributes
         children
         t
     end
@@ -25,6 +24,15 @@ classdef svg < svg_reader.element
             id = cellfun(fh,obj.children,'un',0)';
             index = (1:length(class_name))';
             obj.t = table(index,class_name,id);
+        end
+        function render(obj)
+            figure(1)
+            clf
+            set(gca,'YDir','reverse')
+            for i = 1:length(obj.children)
+                child = obj.children{i};
+                child.render();
+            end
         end
     end
 end

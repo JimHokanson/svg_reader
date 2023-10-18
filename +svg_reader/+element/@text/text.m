@@ -1,18 +1,17 @@
-classdef text < handle
-    %UNTITLED6 Summary of this class goes here
-    %   Detailed explanation goes here
+classdef text < svg_reader.element
+    %
+    %   Class:
+    %   svg_reader.element.text
 
     properties
         parent
-        attributes
         value
     end
 
     methods
         function obj = text(item,parent)
             obj.parent = parent;
-            s = svg_reader.utils.getAttributes(item);
-            obj.attributes = s;
+            obj.getAttributes(item);
             obj.value = char(item.getTextContent());
         end
     end

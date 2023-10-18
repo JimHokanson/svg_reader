@@ -11,7 +11,6 @@ classdef g < svg_reader.element
 
     properties
         parent
-        attributes
         id
         children
         t
@@ -20,8 +19,8 @@ classdef g < svg_reader.element
     methods
         function obj = g(item,parent)
             obj.parent = parent;
-            s = svg_reader.utils.getAttributes(item);
-            obj.attributes = s;
+            obj.getAttributes(item)
+            s = obj.attributes;
             if isfield(s,'id')
                 obj.id = s.id;
             end
@@ -37,6 +36,12 @@ classdef g < svg_reader.element
             id = cellfun(fh,obj.children,'un',0)';
             index = (1:length(class_name))';
             obj.t = table(index,class_name,id);
+        end
+        function render(obj)
+            for i = 1:length(obj.children)
+                child = obj.children{i};
+                child.render();
+            end
         end
     end
 end
