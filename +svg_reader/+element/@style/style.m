@@ -13,6 +13,8 @@ classdef style < svg_reader.element
         class_styles
         id_names
         id_styles
+        element_names
+        element_styles
         raw_value
     end
 
@@ -48,6 +50,14 @@ classdef style < svg_reader.element
             %}
 
             %Basically looking for: name {values}
+
+            %Need to remove comments
+            %/* */  <- seen in wild
+            %// too?
+
+            style_value = obj.raw_value;
+
+
             results = regexp(obj.raw_value,'([^{]+){([^}]+)}','tokens');
             n_results = length(results);
             names = cell(1,n_results);
@@ -63,6 +73,13 @@ classdef style < svg_reader.element
                 elseif temp(1) == '#'
                     %fine
                 else
+                    %TODO: Allow elements
+                    %TODO: Acknowledge lack of support for
+                    %anything with a space or :
+                    %
+                    %Apparently this is valid: 
+                    %   svg:hover path
+                    %   yikes!
                     error('Unrecognized style element: %s',temp)
                 end
                 names{i} = temp(2:end);

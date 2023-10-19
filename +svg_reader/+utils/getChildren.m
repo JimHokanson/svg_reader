@@ -12,6 +12,9 @@ for i = 1:n
     node_name = char(item.getNodeName);
     %saw #text - not sure what that indicates vs just text
     switch node_name
+        case '#comment'
+            child_obj = [];
+            keep_mask(i) = false;
         case 'g'
             child_obj = svg_reader.element.g(item,parent);
         case 'image'

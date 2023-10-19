@@ -43,13 +43,16 @@ classdef image < svg_reader.element
             %   Don't worry about for now
 
             
+            data = obj.getImageData();
 
             if isfield(obj.attributes,'transform')
-                %TODO: Apply transform
+                data = obj.attributes.transform.applyImageTransform(data);
+                [x,y] = obj.attributes.transform.applyTransform(0,0); 
             end
 
-            data = obj.getImageData();
-            im = image(data);
+            %x = 0:(size(data,2)-1);
+            %y = 0:(size(data,1)-1);
+            image(x,y,data);
         end
         function data = getImageData(obj)
             %TODO: This should be cached locally

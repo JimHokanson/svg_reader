@@ -41,7 +41,9 @@ classdef line < svg_reader.element
             obj.y = str2double({s.y1 s.y2});
         end
         function render(obj)
-            keyboard
+            c = svg_reader.utils.getColor(obj.attributes,'stroke',obj);
+            %TODO: figure out line width
+            line(obj.x,obj.y,'Color',c,'LineWidth',3)
         end
     end
 end

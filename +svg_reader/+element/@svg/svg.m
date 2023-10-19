@@ -28,11 +28,13 @@ classdef svg < svg_reader.element
         function render(obj)
             figure(1)
             clf
+            hold on
             set(gca,'YDir','reverse')
             for i = 1:length(obj.children)
                 child = obj.children{i};
                 child.render();
             end
+            %TODO: respect viewbox
         end
     end
 end

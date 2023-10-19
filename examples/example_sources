@@ -1,3 +1,6 @@
 file sources:
 
-1532356785invader.svg from https://www.sitepoint.com/css-with-svg/
+1532356785invader.svg FROM https://www.sitepoint.com/css-with-svg/
+fill_example 01 and 02 mdn FROM https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/fill-rule
+orange_sun.svg FROM https://www.sitepoint.com/understanding-svg-fill-rule-property/
+yellow_star.svg FROM https://www.sitepoint.com/understanding-svg-fill-rule-property/

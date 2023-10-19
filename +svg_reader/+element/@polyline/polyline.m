@@ -38,7 +38,9 @@ classdef polyline < svg_reader.element
             obj.points = [temp2(1:2:end)' temp2(2:2:end)'];
         end
         function render(obj)
-            keyboard
+            c = svg_reader.utils.getColor(obj.attributes,'stroke',obj);
+            %TODO: Figure out width
+            line(obj.points(:,1),obj.points(:,2),'Color',c,'LineWidth',3)
         end
     end
 end

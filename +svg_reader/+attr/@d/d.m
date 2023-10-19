@@ -12,7 +12,7 @@ classdef d < handle
     %M - move to X,Y (x,y)
     %m - add to X,Y  (dx,dy)
     %L - draw a line to X,Y (x,y) - interesting so possible to do multiple
-        %lines with gaps 
+    %lines with gaps
     %l (dx,dy)
     %H (x)
     %h (dx)
@@ -47,7 +47,7 @@ classdef d < handle
 
             matches = regexp(input_string,command_pattern,'match');
 
-            number_pattern = '-?\d+.?\d+';
+            number_pattern = '-?\d+\.?\d*';
 
             n_matches = length(matches);
             commands = cell(1,n_matches);
@@ -65,6 +65,10 @@ classdef d < handle
             obj.command_inputs = inputs;
         end
         function [x,y] = getXY(obj,n_points_per_step)
+
+            %keyboard
+            rootx = 0;
+            rooty = 0;
             cx = 0;
             cy = 0;
             x = [];
@@ -78,32 +82,93 @@ classdef d < handle
                     case 'M'
                         if i ~= 1
                             %Need NaNs to break up
-                            error('not yet handled')
+                            x = [x NaN]; %#ok<AGROW>
+                            y = [y NaN]; %#ok<AGROW>
                         end
                         %TODO: check length
                         %(x, y)+
                         cx = inputs(1);
                         cy = inputs(2);
+                        rootx = cx;
+                        rooty = cy;
+
                         for j = 3:2:length(inputs)
                             %implicit Ls
                             error('Not yet implemented')
                         end
                     case 'm'
                         keyboard
-                    case 'l'
-                        keyboard
+
                     case 'L'
-                        keyboard
+                        %(x,y)+
+                        for j = 1:2:length(inputs)
+                            X = inputs(j);
+                            Y = inputs(j+1);
+                            cx = X;
+                            cy = Y;
+                            x = [x X]; %#ok<AGROW>
+                            y = [y Y]; %#ok<AGROW>
+                        end
+                    case 'l'
+                        %(dx, dy)+
+                        for j = 1:2:length(inputs)
+                            X = cx + inputs(j);
+                            Y = cy + inputs(j+1);
+                            cx = X;
+                            cy = Y;
+                            x = [x X]; %#ok<AGROW>
+                            y = [y Y]; %#ok<AGROW>
+                        end
                     case 'H'
-                        keyboard
+                        %y+
+                        for j = 1:length(inputs)
+                            y = [y cy]; %#ok<AGROW>
+                            cx = inputs(j);
+                            x = [x cx]; %#ok<AGROW>
+                        end
                     case 'h'
-                        keyboard
+                        %dy+
+                        for j = 1:length(inputs)
+                            y = [y cy]; %#ok<AGROW>
+                            cx = cx + inputs(j);
+                            x = [x cx]; %#ok<AGROW>
+                        end
                     case 'V'
-                        keyboard
+                        %y+
+                        for j = 1:length(inputs)
+                            x = [x cx]; %#ok<AGROW>
+                            cy = inputs(j);
+                            y = [y cy]; %#ok<AGROW>
+                        end
                     case 'v'
-                        keyboard
+                        %dy+
+                        for j = 1:length(inputs)
+                            x = [x cx]; %#ok<AGROW>
+                            cy = cy + inputs(j);
+                            y = [y cy]; %#ok<AGROW>
+                        end
                     case 'C'
-                        keyboard
+                        %(x1,y1, x2,y2, x,y)+
+                        %Po′ = Pn = {x, y} ;
+                        %Pcs = {x1, y1} ;
+                        %Pce = {x2, y2}
+                        t = linspace(0, 1, n_points_per_step);
+                        for j = 1:6:length(inputs)
+                            P0x = cx;
+                            P0y = cy;
+                            P1x = inputs(j);
+                            P1y = inputs(j+1);
+                            P2x = inputs(j+2);
+                            P2y = inputs(j+3);
+                            P3x = inputs(j+4);
+                            P3y = inputs(j+5);
+                            X = (1 - t).^3 * P0x + 3*(1 - t).^2 .*t .* P1x + 3 * (1 - t) .* t.^2 * P2x + t.^3 * P3x;
+                            Y = (1 - t).^3 * P0y + 3*(1 - t).^2 .*t .* P1y + 3 * (1 - t) .* t.^2 * P2y + t.^3 * P3y;
+                            x = [x X]; %#ok<AGROW>
+                            y = [y Y]; %#ok<AGROW>
+                            cx = P3x;
+                            cy = P3y;
+                        end
                     case 'c'
                         %TODO: check that length is 6
                         %(dx1,dy1, dx2,dy2, dx,dy)+
@@ -124,18 +189,83 @@ classdef d < handle
                             P2x = cx + inputs(j+2);
                             P2y = cy + inputs(j+3);
                             P3x = cx + inputs(j+4);
-                            P3y = cx + inputs(j+5);
+                            P3y = cy + inputs(j+5);
                             X = (1 - t).^3 * P0x + 3*(1 - t).^2 .*t .* P1x + 3 * (1 - t) .* t.^2 * P2x + t.^3 * P3x;
                             Y = (1 - t).^3 * P0y + 3*(1 - t).^2 .*t .* P1y + 3 * (1 - t) .* t.^2 * P2y + t.^3 * P3y;
-                            x = [x X]; %#ok<AGROW> 
-                            y = [y Y]; %#ok<AGROW> 
+                            x = [x X]; %#ok<AGROW>
+                            y = [y Y]; %#ok<AGROW>
                             cx = P3x;
                             cy = P3y;
                         end
                     case 'S'
-                        keyboard
+                        %The start control point is the reflection of the
+                        %end control point of the previous curve command
+                        %about the current point. If the previous command
+                        %wasn't a cubic Bézier curve, the start control
+                        %point is the same as the curve starting point
+                        %(current point).
+
+
+                        %(x2,y2, x,y)+
+                        for j = 1:4:length(inputs)
+                            P0x = cx;
+                            P0y = cy;
+                            if (j > 1) || (i > 1 && any(obj.commands{i-1} == 'cCSs'))
+                                %reflect P2x and P2y abut the current point
+                                %
+                                %Not sure why it isn't
+                                %2*(P0x-P2x)
+                                P1x = 2*P0x - P2x;
+                                P1y = 2*P0y - P2y;
+                            else
+                                P1x = cx;
+                                P1y = cy;
+                            end
+
+                            P2x = inputs(j);
+                            P2y = inputs(j+1);
+                            P3x = inputs(j+2);
+                            P3y = inputs(j+3);
+
+                            X = (1 - t).^3 * P0x + 3*(1 - t).^2 .*t .* P1x + 3 * (1 - t) .* t.^2 * P2x + t.^3 * P3x;
+                            Y = (1 - t).^3 * P0y + 3*(1 - t).^2 .*t .* P1y + 3 * (1 - t) .* t.^2 * P2y + t.^3 * P3y;
+                            x = [x X]; %#ok<AGROW>
+                            y = [y Y]; %#ok<AGROW>
+                            cx = P3x;
+                            cy = P3y;
+                        end
                     case 's'
-                        keyboard
+                        %(dx2,dy2, dx,dy)+
+                        for j = 1:4:length(inputs)
+                            P0x = cx;
+                            P0y = cy;
+                            if (j > 1) || (i > 1 && any(obj.commands{i-1} == 'cCSs'))
+                                %reflect P2x and P2y abut the current point
+                                %
+                                %Simply take difference and double
+                                %
+                                %   Example online was 220,220
+                                %   with previous P2 being 200,200
+                                %   result should be 240,240
+                                P1x = 2*P0x - P2x;
+                                P1y = 2*P0y - P2y;
+                            else
+                                P1x = cx;
+                                P1y = cy;
+                            end
+
+                            P2x = cx + inputs(j);
+                            P2y = cy + inputs(j+1);
+                            P3x = cx + inputs(j+2);
+                            P3y = cy + inputs(j+3);
+
+                            X = (1 - t).^3 * P0x + 3*(1 - t).^2 .*t .* P1x + 3 * (1 - t) .* t.^2 * P2x + t.^3 * P3x;
+                            Y = (1 - t).^3 * P0y + 3*(1 - t).^2 .*t .* P1y + 3 * (1 - t) .* t.^2 * P2y + t.^3 * P3y;
+                            x = [x X]; %#ok<AGROW>
+                            y = [y Y]; %#ok<AGROW>
+                            cx = P3x;
+                            cy = P3y;
+                        end
                     case 'Q'
                         keyboard
                     case 'q'
@@ -148,10 +278,11 @@ classdef d < handle
                         keyboard
                     case 'a'
                         keyboard
-                    case 'Z'
-                        keyboard
-                    case 'z'
-                        keyboard
+                    case {'Z','z'}
+                        x = [x rootx]; %#ok<AGROW>
+                        y = [y rooty]; %#ok<AGROW>
+                        cx = rootx;
+                        cy = rooty;
                     otherwise
                         error('Unrecognized command: %s',obj.commands{i})
                 end
