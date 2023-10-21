@@ -1,4 +1,4 @@
-function p = genFixedWidthLine(x,y)
+function p = genFixedWidthLine(x,y,stroke_width,line_join,line_cap)
 %
 %   svg_reader.utils.genFixedWidthLine
 %
@@ -38,6 +38,10 @@ y = [-5 1 4 1];
 line_join = 'bevel';
 line_join = 'round';
 line_join = 'miter';
+%butt, round, square
+line_cap = 'butt';
+line_cap = 'square';
+line_cap = 'round';
 stroke_width = 0.4;
 radius = stroke_width/2;
 
@@ -218,7 +222,7 @@ h.FaceColor = [0 0 0];
 h.FaceAlpha = 1;
 hold off
 
-keyboard
+%keyboard
 
 end
 
