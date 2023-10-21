@@ -15,6 +15,8 @@ for i = 1:n
         case '#comment'
             child_obj = [];
             keep_mask(i) = false;
+        case 'desc'
+            child_obj = svg_reader.element.desc(item,parent);
         case 'g'
             child_obj = svg_reader.element.g(item,parent);
         case 'image'
@@ -23,6 +25,8 @@ for i = 1:n
             child_obj = svg_reader.element.line(item,parent);
         case 'path'
             child_obj = svg_reader.element.path(item,parent);
+        case 'polygon'
+            child_obj = svg_reader.element.polygon(item,parent);
         case 'polyline'
             child_obj = svg_reader.element.polyline(item,parent);
         case 'text'

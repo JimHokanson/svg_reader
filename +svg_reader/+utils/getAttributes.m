@@ -8,9 +8,9 @@ for i = 0:temp.getLength - 1
     name = char(item.getName);
     value = char(item.getValue);
     try
-    s.(name) = value;
+        s.(name) = value;
     catch
-        name = regexprep(name, '[ :]', '_');
+        name = regexprep(name, '[ :-]', '_');
         s.(name) = value;
     end
 end

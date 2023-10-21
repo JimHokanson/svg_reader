@@ -32,7 +32,7 @@ classdef polyline < svg_reader.element
             obj.getAttributes(item);
             s = obj.attributes;
             
-            number_pattern = '-?\d+.?\d+';
+            number_pattern = '-?\d+\.?\d+';
             temp = regexp(s.points,number_pattern,'match');
             temp2 = str2double(temp);
             obj.points = [temp2(1:2:end)' temp2(2:2:end)'];

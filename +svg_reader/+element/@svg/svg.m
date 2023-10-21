@@ -29,6 +29,7 @@ classdef svg < svg_reader.element
             figure(1)
             clf
             hold on
+            axis equal
             set(gca,'YDir','reverse')
             for i = 1:length(obj.children)
                 child = obj.children{i};
