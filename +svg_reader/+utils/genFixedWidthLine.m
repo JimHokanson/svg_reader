@@ -31,31 +31,36 @@ function p = genFixedWidthLine(x,y,stroke_width,line_join,line_cap)
 
 %https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke-miterlimit
 
-x = [1 4 6 10]';
-y = [1 4 1 5]';
+if nargin == 0
+    %testing
+    x = [1 4 6 10]';
+    y = [1 4 1 5]';
+    
+    x = [1 4 6 3]';
+    y = [1 4 1 -5]';
+    
+    x = [3 6 4 1];
+    y = [-5 1 4 1];
+    
+    rng(2)
+    x = randi(200,1,20);
+    y = randi(200,1,20);
+    
+    line_join = 'bevel';
+    
+    line_join = 'miter';
+    line_join = 'round';
+    line_join = 'miter';
+    line_join = 'bevel';
+    line_join = 'round';
+    %butt, round, square
+    line_cap = 'butt';
+    line_cap = 'square';
+    %line_cap = 'round';
+    stroke_width = 1;
+end
 
-x = [1 4 6 3]';
-y = [1 4 1 -5]';
 
-x = [3 6 4 1];
-y = [-5 1 4 1];
-
-rng(2)
-x = randi(200,1,20);
-y = randi(200,1,20);
-
-line_join = 'bevel';
-
-line_join = 'miter';
-line_join = 'round';
-line_join = 'miter';
-line_join = 'bevel';
-line_join = 'round';
-%butt, round, square
-line_cap = 'butt';
-line_cap = 'square';
-%line_cap = 'round';
-stroke_width = 1;
 radius = stroke_width/2;
 
 UL = NaN(1e6,2);
@@ -161,15 +166,6 @@ for i = 1:length(x)-2
         pu2 = h__getIntersectionPoint(pu1,pu2,pu3,pu4);
         new_ul = [pu1; pu2];
 
-
-        %Only keep intersection point, remove pu3
-        
-
-        %TODO: calculate how to join
-        %miter
-        %round
-        %bevel
-        %etc.
         switch line_join
             case 'bevel'
                 xy = [pl2; pl3];
@@ -187,7 +183,7 @@ for i = 1:length(x)-2
 
     p2 = polyshape([new_ul; new_ll(end:-1:1,:)]);
     p = union(p,p2);
-    plot(p)
+    %plot(p)
     %pause
 
     n = length(new_ul);
@@ -201,50 +197,53 @@ end
 p2 = polyshape([UL(uli,:); pu4; pl4; LL(lli,:)]);
 p = union(p,p2);
 
+
+%Add on last line
 UL(uli+1,:) = pu4;
 LL(lli+1,:) = pl4;
 UL = UL(1:uli+1,:);
 LL = LL(1:lli+1,:);
 
-% line_cap = 'butt';
-% line_cap = 'square';
-% line_cap = 'round';
-
-switch line_cap
-    case 'butt'
-        %Nothing needed
-    case 'square'
-        %Note, reusing last unit vector
-        xy_end2 = getHalfSquare(pu4,pl4,uv2,radius);
-        p2 = polyshape(xy_end2);
-        p = union(p,p2);
-
-        %Recalculate unit vector
-        dv = [x(1)-x(2),y(1)-y(2)];
-        uv = dv/norm(dv);
-        xy_end2 = getHalfSquare(UL(1,:),LL(1,:),uv,radius);
-        p2 = polyshape(xy_end2);
-        p = union(p,p2);
-
-    case 'round'
-        %get centers
-        %pu4
-        %pl4
-        xc = 0.5*(pu4(1)+pl4(1));
-        yc = 0.5*(pu4(2)+pl4(2));
-        xy_end2 = getFullCircle([xc,yc],radius);
-        p2 = polyshape(xy_end2);
-        p = union(p,p2);
-
-        xc = 0.5*(UL(1,1)+LL(1,1));
-        yc = 0.5*(UL(1,2)+LL(1,2));
-        xy_end2 = getFullCircle([xc,yc],radius);
-        p2 = polyshape(xy_end2);
-        p = union(p,p2);
-    otherwise
-        error('Unrecognized line-join option')
+%TODO: Handle a closed loop path - currently only handling open
+if x(1) == x(end) && y(1) == y(end)
+    %TODO: Can we do my modifying the loop?
+    keyboard
+else
+    switch line_cap
+        case 'butt'
+            %Nothing needed
+        case 'square'
+            %Note, reusing last unit vector
+            xy_end2 = getHalfSquare(pu4,pl4,uv2,radius);
+            p2 = polyshape(xy_end2);
+            p = union(p,p2);
+    
+            %Recalculate unit vector
+            dv = [x(1)-x(2),y(1)-y(2)];
+            uv = dv/norm(dv);
+            xy_end2 = getHalfSquare(UL(1,:),LL(1,:),uv,radius);
+            p2 = polyshape(xy_end2);
+            p = union(p,p2);
+    
+        case 'round'
+            %get centers
+            %pu4
+            %pl4
+            xc = 0.5*(pu4(1)+pl4(1));
+            yc = 0.5*(pu4(2)+pl4(2));
+            xy_end2 = getFullCircle([xc,yc],radius);
+            p2 = polyshape(xy_end2);
+            p = union(p,p2);
+    
+            xc = 0.5*(UL(1,1)+LL(1,1));
+            yc = 0.5*(UL(1,2)+LL(1,2));
+            xy_end2 = getFullCircle([xc,yc],radius);
+            p2 = polyshape(xy_end2);
+            p = union(p,p2);
+        otherwise
+            error('Unrecognized line-join option')
+    end
 end
-
 
 
 %Now we need to do the ends ...
@@ -275,17 +274,19 @@ end
 %p = polyshape(points,'SolidBoundaryOrientation','cw');
 %p = p.rmholes();
 
-figure(1)
-clf
-plot(x,y,'b','LineWidth',3);
-hold on
-plot(UL(:,1),UL(:,2),'r','LineWidth',3)
-plot(LL(:,1),LL(:,2),'g','LineWidth',3)
-h = plot(p);
-h.FaceColor = [0 0 0];
-h.FaceAlpha = 0.2;
-hold off
-axis equal
+if nargin == 0
+    figure(1)
+    clf
+    plot(x,y,'b','LineWidth',3);
+    hold on
+    plot(UL(:,1),UL(:,2),'r','LineWidth',3)
+    plot(LL(:,1),LL(:,2),'g','LineWidth',3)
+    h = plot(p);
+    h.FaceColor = [0 0 0];
+    h.FaceAlpha = 0.2;
+    hold off
+    axis equal
+end
 
 end
 

@@ -84,15 +84,17 @@ classdef path < svg_reader.element
                 end
             end
 
-            c = svg_reader.utils.getColor(obj.attributes,'stroke',obj);
+            svg_reader.utils.renderStroke(obj,x,y);
 
-            %TODO: what is default if not explicitly None?
-            %[] - missing
-            %-1 - none
-            if ~isempty(c) && c(1) ~= -1
-                %TODO: Handle linewidth
-                line(x,y,'Color',c,'LineWidth',3)
-            end
+%             c = svg_reader.utils.getColor(obj.attributes,'stroke',obj);
+% 
+%             %TODO: what is default if not explicitly None?
+%             %[] - missing
+%             %-1 - none
+%             if ~isempty(c) && c(1) ~= -1
+%                 %TODO: Handle linewidth
+%                 line(x,y,'Color',c,'LineWidth',3)
+%             end
 
             %either present or none (-1)
             c = svg_reader.utils.getColor(obj.attributes,'fill',obj);

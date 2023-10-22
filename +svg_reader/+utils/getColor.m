@@ -29,11 +29,14 @@ switch type
         if isfield(s,'stroke')
             color_string = s.stroke;
         end
+        if isfield(s,'stroke_opacity')
+            error('Unhandled case')
+        end
     case 'fill'
         if isfield(s,'fill')
             color_string = s.fill;
         end
-        if isfield(s,'fill-opacity')
+        if isfield(s,'fill_opacity')
             error('Unhandled case')
         end
 end

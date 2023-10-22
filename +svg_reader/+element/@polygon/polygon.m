@@ -31,17 +31,7 @@ classdef polygon < svg_reader.element
             x(mask) = [];
             y(mask) = [];
 
-            c = svg_reader.utils.getColor(obj.attributes,'stroke',obj);
-
-            %TODO: what is default if not explicitly None?
-            %[] - missing
-            %-1 - none
-            if ~isempty(c) && c(1) ~= -1
-                %TODO: Handle linewidth
-                %
-                %Last point is connected to the first point
-                line([x; x(1)],[y; y(1)],'Color',c,'LineWidth',3)
-            end
+            
 
             %either present or none (-1)
             c = svg_reader.utils.getColor(obj.attributes,'fill',obj);
@@ -59,6 +49,8 @@ classdef polygon < svg_reader.element
                 %
                 %How do we control width
             end
+
+            svg_reader.utils.renderStroke(obj,x,y);
 
         end
     end
