@@ -6,6 +6,9 @@ function p = genFixedWidthLine(x,y,stroke_width,line_join,line_cap)
 %
 %   THIS IS A WORK IN PROGRESS
 
+%   TODO: If single point, what are the rules
+%   - square and circle show (
+
 
 %stroke-dasharray
 %stroke-dashoffset
@@ -15,6 +18,8 @@ function p = genFixedWidthLine(x,y,stroke_width,line_join,line_cap)
 % stroke-linecap
 % butt | round | square
 % default: butt
+%
+%   single point????
 
 %https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke-linejoin
 % stroke-linejoin
@@ -35,14 +40,22 @@ y = [1 4 1 -5]';
 x = [3 6 4 1];
 y = [-5 1 4 1];
 
+rng(2)
+x = randi(200,1,20);
+y = randi(200,1,20);
+
 line_join = 'bevel';
+
+line_join = 'miter';
 line_join = 'round';
 line_join = 'miter';
+line_join = 'bevel';
+line_join = 'round';
 %butt, round, square
 line_cap = 'butt';
 line_cap = 'square';
-line_cap = 'round';
-stroke_width = 0.4;
+%line_cap = 'round';
+stroke_width = 1;
 radius = stroke_width/2;
 
 UL = NaN(1e6,2);
@@ -80,10 +93,10 @@ LL(1,:) = [x1, y1] - radius * [uv1(2), -uv1(1)];
 dv2 = dv1;
 uv2 = uv1;
 
+p = polyshape;
+
 for i = 1:length(x)-2
     
-    
-
     %diff vector
     dv1 = dv2;
     dv2 = [x(i+2)-x(i+1),y(i+2)-y(i+1)];
@@ -136,7 +149,7 @@ for i = 1:length(x)-2
             case 'miter'
                 xy = h__getIntersectionPoint(pu1,pu2,pu3,pu4);
             case 'round'
-                xy = getHalfCircle([x2,y2],pu2,pu3,radius,false);
+                xy = getHalfCircle([x2,y2],pu2,pu3,radius);
             otherwise
                 error('Unrecognized line-join option')
         end
@@ -163,7 +176,7 @@ for i = 1:length(x)-2
             case 'miter'
                 xy = h__getIntersectionPoint(pl1,pl2,pl3,pl4);
             case 'round'
-                xy = getHalfCircle([x2,y2],pl2,pl3,radius,true);
+                xy = getHalfCircle([x2,y2],pl2,pl3,radius);
             otherwise
                 error('Unrecognized line-join option')
         end
@@ -172,6 +185,10 @@ for i = 1:length(x)-2
         new_ll = [pl1; xy];
     end
 
+    p2 = polyshape([new_ul; new_ll(end:-1:1,:)]);
+    p = union(p,p2);
+    plot(p)
+    %pause
 
     n = length(new_ul);
     UL(uli+1:uli+n,:) = new_ul;
@@ -181,8 +198,54 @@ for i = 1:length(x)-2
     lli = lli+n;
 end
 
+p2 = polyshape([UL(uli,:); pu4; pl4; LL(lli,:)]);
+p = union(p,p2);
+
 UL(uli+1,:) = pu4;
 LL(lli+1,:) = pl4;
+UL = UL(1:uli+1,:);
+LL = LL(1:lli+1,:);
+
+% line_cap = 'butt';
+% line_cap = 'square';
+% line_cap = 'round';
+
+switch line_cap
+    case 'butt'
+        %Nothing needed
+    case 'square'
+        %Note, reusing last unit vector
+        xy_end2 = getHalfSquare(pu4,pl4,uv2,radius);
+        p2 = polyshape(xy_end2);
+        p = union(p,p2);
+
+        %Recalculate unit vector
+        dv = [x(1)-x(2),y(1)-y(2)];
+        uv = dv/norm(dv);
+        xy_end2 = getHalfSquare(UL(1,:),LL(1,:),uv,radius);
+        p2 = polyshape(xy_end2);
+        p = union(p,p2);
+
+    case 'round'
+        %get centers
+        %pu4
+        %pl4
+        xc = 0.5*(pu4(1)+pl4(1));
+        yc = 0.5*(pu4(2)+pl4(2));
+        xy_end2 = getFullCircle([xc,yc],radius);
+        p2 = polyshape(xy_end2);
+        p = union(p,p2);
+
+        xc = 0.5*(UL(1,1)+LL(1,1));
+        yc = 0.5*(UL(1,2)+LL(1,2));
+        xy_end2 = getFullCircle([xc,yc],radius);
+        p2 = polyshape(xy_end2);
+        p = union(p,p2);
+    otherwise
+        error('Unrecognized line-join option')
+end
+
+
 
 %Now we need to do the ends ...
 
@@ -203,26 +266,26 @@ LL(lli+1,:) = pl4;
 %   - zero length - show square - oriented in x y, no rotation
 
 %trim
-UL = UL(1:uli+1,:);
-LL = LL(1:lli+1,:);
 
-points = [UL; LL(end:-1:1,:)];
 
-p = polyshape(points);
+%points = [UL; xy_end2; LL(end:-1:1,:)];
+
+%p = patch(points(:,1),points(:,2),'k');
+
+%p = polyshape(points,'SolidBoundaryOrientation','cw');
+%p = p.rmholes();
 
 figure(1)
 clf
-axis equal
 plot(x,y,'b','LineWidth',3);
 hold on
 plot(UL(:,1),UL(:,2),'r','LineWidth',3)
 plot(LL(:,1),LL(:,2),'g','LineWidth',3)
 h = plot(p);
 h.FaceColor = [0 0 0];
-h.FaceAlpha = 1;
+h.FaceAlpha = 0.2;
 hold off
-
-%keyboard
+axis equal
 
 end
 
@@ -244,7 +307,7 @@ xy = [x y];
 
 end
 
-function xy = getHalfCircle(xyc,xy1,xy2,radius,flip)
+function xy = getHalfCircle(xyc,xy1,xy2,radius)
 x1 = xy1(1);
 y1 = xy1(2);
 x2 = xy2(1);
@@ -258,13 +321,58 @@ centerY = xyc(2); % Center y-coordinate
 start_angle = atan2(y1 - centerY, x1 - centerX);
 end_angle = atan2(y2 - centerY, x2 - centerX);
 
+angle_diff = abs(start_angle-end_angle);
+other_angle_diff = 2*pi - angle_diff;
+
+%fprintf('%0.3f, %0.3f\n',angle_diff,other_angle_diff)
+
+if angle_diff > other_angle_diff
+    if start_angle < 0
+        end_angle = start_angle - other_angle_diff;
+    else
+        end_angle = start_angle + other_angle_diff;
+    end
+end
+
 % if flip
-%     end_angle = end_angle + 2*pi;
-%     keyboard
+%     %difference is either:
+%     % - the difference
+%     % - 2pi - difference
+%     %
+%     %easier to think about in degrees (for me)
+%     %   20%
+%     %   340%
+% 
+%     end_angle = start_angle + other_angle_diff;
 % end
 
 % Generate a range of angles from startAngle to endAngle
 theta = linspace(start_angle, end_angle, 100)'; % 100 points for a smooth curve
+
+% Calculate the x and y coordinates of the half-circle
+x = centerX + radius * cos(theta);
+y = centerY + radius * sin(theta);
+
+xy = [x,y];
+
+
+end
+
+function xy = getHalfSquare(xy1,xy2,uv1,radius)
+
+    temp1 = xy1 + radius * uv1;
+    temp2 = xy2 + radius * uv1;
+    xy = [xy1; temp1; temp2; xy2];
+end
+
+function xy = getFullCircle(xyc,radius)
+
+% Define the center and radius of the half-circle
+centerX = xyc(1);
+centerY = xyc(2); % Center y-coordinate
+
+% Generate a range of angles from startAngle to endAngle
+theta = linspace(0, 2*pi, 200)'; % 100 points for a smooth curve
 
 % Calculate the x and y coordinates of the half-circle
 x = centerX + radius * cos(theta);
