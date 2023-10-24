@@ -29,6 +29,8 @@ for i = 1:n
             child_obj = svg_reader.element.polygon(item,parent);
         case 'polyline'
             child_obj = svg_reader.element.polyline(item,parent);
+        case 'script'
+            child_obj = svg_reader.element.script(item,parent);
         case 'text'
             child_obj = svg_reader.element.text(item,parent);
         case '#text'

@@ -1,4 +1,4 @@
-classdef read_options < handle
+classdef read_options
     %
     %   Class:
     %   svg_reader.read_options
@@ -10,9 +10,6 @@ classdef read_options < handle
         %- silent
         unsupported = 'error'
         
-        %NYI
-        n_points_per_path = 40
-
     end
 
     methods

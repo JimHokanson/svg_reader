@@ -5,7 +5,12 @@ classdef polygon < svg_reader.element
     %
     %   See Also
     %   --------
-    %   
+    %   svg_reader.element
+
+    %{
+    Test with:
+    ???
+    %}
 
     properties
         parent
@@ -18,10 +23,8 @@ classdef polygon < svg_reader.element
             obj.getAttributes(item);
             s = obj.attributes;
 
-            number_pattern = '-?\d+\.?\d+';
-            temp = regexp(s.points,number_pattern,'match');
-            temp2 = str2double(temp);
-            obj.points = [temp2(1:2:end)' temp2(2:2:end)'];
+            numbers = svg_reader.utils.extractListofNumbers(input_str);
+            obj.points = [numbers(1:2:end)' numbers(2:2:end)'];
         end
         function render(obj)
             x = obj.points(:,1);
@@ -30,6 +33,8 @@ classdef polygon < svg_reader.element
             mask = (diff(x) == 0) & (diff(y) == 0);
             x(mask) = [];
             y(mask) = [];
+
+            %TODO: What about 1 point polygon? error?
 
             
 
@@ -49,6 +54,10 @@ classdef polygon < svg_reader.element
                 %
                 %How do we control width
             end
+
+            %Add on explicit closing, or maybe pass in as parameter
+            x = [x; x(1)];
+            y = [y; y(1)];
 
             svg_reader.utils.renderStroke(obj,x,y);
 

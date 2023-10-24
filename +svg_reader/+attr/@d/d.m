@@ -5,6 +5,7 @@ classdef d < handle
     properties
         parent
         raw
+        matches
         commands
         command_inputs
     end
@@ -42,13 +43,17 @@ classdef d < handle
             Elliptical Arc Curve: A, a
             ClosePath: Z, z
             %}
+
+            obj.raw = input_string;
+
+            
+
             command_chars = 'MmLlHhVvCcSsQqTtAaZz';
             command_pattern = sprintf('[%s][^%s]*',command_chars,command_chars);
 
             matches = regexp(input_string,command_pattern,'match');
 
-            number_pattern = '-?\d+\.?\d*';
-
+            obj.matches = matches;
             n_matches = length(matches);
             commands = cell(1,n_matches);
             inputs = cell(1,n_matches);
@@ -56,10 +61,8 @@ classdef d < handle
                 temp = matches{i};
                 commands{i} = temp(1);
                 remainder = temp(2:end);
-                %c-0.11,0.22-0.22,0.43-0.32,0.65'
-                %inputs{i} = str2double(strsplit(remainder,','));
-                temp = regexp(remainder,number_pattern,'match');
-                inputs{i} = str2double(temp);
+                numbers = svg_reader.utils.extractListofNumbers(remainder);
+                inputs{i} = numbers;
             end
             obj.commands = commands;
             obj.command_inputs = inputs;
@@ -80,6 +83,7 @@ classdef d < handle
                 inputs = obj.command_inputs{i};
                 switch obj.commands{i}
                     case 'M'
+                        %(x, y)+
                         if i ~= 1
                             %Need NaNs to break up
                             x = [x NaN]; %#ok<AGROW>
@@ -93,11 +97,36 @@ classdef d < handle
                         rooty = cy;
 
                         for j = 3:2:length(inputs)
-                            %implicit Ls
-                            error('Not yet implemented')
+                            X = inputs(j);
+                            Y = inputs(j+1);
+                            cx = X;
+                            cy = Y;
+                            x = [x X]; %#ok<AGROW>
+                            y = [y Y]; %#ok<AGROW>
                         end
                     case 'm'
-                        keyboard
+                        %(dx, dy)+
+                        if i ~= 1
+                            %Need NaNs to break up
+                            x = [x NaN]; %#ok<AGROW>
+                            y = [y NaN]; %#ok<AGROW>
+                        end
+                        %TODO: check length
+                        %(x, y)+
+                        cx = cx + inputs(1);
+                        cy = cy + inputs(2);
+                        rootx = cx;
+                        rooty = cy;
+
+                        for j = 3:2:length(inputs)
+                            %L or l? - answer: l
+                            X = cx + inputs(j);
+                            Y = cy + inputs(j+1);
+                            cx = X;
+                            cy = Y;
+                            x = [x X]; %#ok<AGROW>
+                            y = [y Y]; %#ok<AGROW>
+                        end
 
                     case 'L'
                         %(x,y)+
@@ -275,9 +304,53 @@ classdef d < handle
                     case 't'
                         keyboard
                     case 'A'
-                        keyboard
+                        for j = 1:7:length(inputs)
+                            %(rx ry angle large-arc-flag sweep-flag x y)+
+                            rx = inputs(j);
+                            ry = inputs(j+1);
+                            angle = inputs(j+2);
+                            large_arc_flag = inputs(j+3);
+                            %large-arc-flag allows to chose one of the large arc (1) or small arc (0),
+                            sweep_flag = inputs(j+4);
+                            %sweep-flag allows to chose one of the clockwise turning arc (1) or counterclockwise turning arc (0)
+                            x2 = inputs(j+5);
+                            y2 = inputs(j+6);
+    
+                            xy1 = [cx,cy];
+                            xy2 = [x2,y2];
+                            t = linspace(0,1,n_points_per_step);
+                            [X,Y] = arc(xy1, rx,ry, angle, large_arc_flag, sweep_flag, xy2, t);
+                            %tempx = x;
+                            %tempy = y;
+                            x = [x X]; %#ok<AGROW>
+                            y = [y Y]; %#ok<AGROW>
+    
+                            cx = x2;
+                            cy = y2;
+                        end
                     case 'a'
-                        keyboard
+                        for j = 1:7:length(inputs)
+                            %(rx ry angle large-arc-flag sweep-flag dx dy)+
+                            rx = inputs(j);
+                            ry = inputs(j+1);
+                            angle = inputs(j+2);
+                            large_arc_flag = inputs(j+3);
+                            %large-arc-flag allows to chose one of the large arc (1) or small arc (0),
+                            sweep_flag = inputs(j+4);
+                            %sweep-flag allows to chose one of the clockwise turning arc (1) or counterclockwise turning arc (0)
+                            x2 = cx + inputs(j+5);
+                            y2 = cy + inputs(j+6);
+    
+                            xy1 = [cx,cy];
+                            xy2 = [x2,y2];
+                            t = linspace(0,1,n_points_per_step);
+                            [X,Y] = arc(xy1, rx,ry, angle, large_arc_flag, sweep_flag, xy2, t);
+                            x = [x X]; %#ok<AGROW>
+                            y = [y Y]; %#ok<AGROW>
+    
+                            cx = x2;
+                            cy = y2;
+                        end
                     case {'Z','z'}
                         x = [x rootx]; %#ok<AGROW>
                         y = [y rooty]; %#ok<AGROW>
@@ -322,4 +395,161 @@ for i = 1:length(pathCommands)
     end
 end
 
+%}
+
+%https://github.com/zHaytam/SvgPathProperties/blob/main/SvgPathProperties/ArcCommand.cs#L23
+function [x,y] = arc(xy1, rx,ry, angle, large_arc_flag, sweep_flag, xy2, t)
+
+%(Point p0, double rx, double ry, double xAxisRotation, bool largeArcFlag, bool sweepFlag, Point p1, double t)
+%from: https://github.com/zHaytam/SvgPathProperties/blob/main/SvgPathProperties/ArcCommand.cs
+% In accordance to: http://www.w3.org/TR/SVG/implnote.html#ArcOutOfRangeParameters
+
+%EQ: 6.1
+rx = abs(rx);
+ry = abs(ry);
+
+%force to 0 to 360 and convert
+phi = mod(angle, 360)/360*2*pi;
+%If the endpoints are identical, then this is equivalent to omitting the elliptical arc segment entirely.
+if (xy1(1) == xy2(1) && xy1(2) == xy2(2))
+    x = xy1(1);
+    y = xy1(2);
+    return
+    %return new Point(x: p0.X, y: p0.Y /*, ellipticalArcAngle: 0*/); // Check if angle is correct
+end
+
+%B.2.5
+% If rx = 0 or ry = 0 then this arc is treated as a straight line segment joining the endpoints.
+if (rx == 0 || ry == 0)
+    x = [xy1(1) xy2(1)];
+    y = [xy1(2) xy2(2)];
+    return
+    %return this.pointOnLine(p0, p1, t);
+    %
+    %return new Point(x: 0, y: 0 /*, ellipticalArcAngle: 0*/); // Check if angle is correct
+end
+
+%Following "Conversion from endpoint to center parameterization"
+%http://www.w3.org/TR/SVG/implnote.html#ArcConversionEndpointToCenter
+
+%Step #1: Compute transformedPoint
+%---------------------------------
+%EQ 5.1
+dx = 0.5*(xy1(1) - xy2(1));
+dy = 0.5*(xy1(2) - xy2(2));
+
+trans_xy = [cos(phi)*dx + sin(phi)*dy, -sin(phi)*dx + cos(phi)*dy];
+x1p = trans_xy(1);
+y1p = trans_xy(2);
+
+
+%Not sure where this comes from ...
+%
+% Ensure radii are large enough
+%radiiCheck = (transformedPoint.X, 2) / Math.Pow(rx, 2) +
+%Math.Pow(transformedPoint.Y, 2) / Math.Pow(ry, 2);
+
+%EQ 6.2
+radii_check = x1p^2/rx^2 + y1p^2/ry^2;
+if (radii_check > 1)
+    rx = sqrt(radii_check) * rx;
+    ry = sqrt(radii_check) * ry;
+end
+
+%EQ 5.2
+c_square_numerator = rx^2*ry^2 - rx^2*y1p^2 - ry^2*x1p^2;
+c_square_denom = rx^2*y1p^2 + ry^2*x1p^2;
+c_radicand = c_square_numerator/c_square_denom;
+if c_radicand < 0
+    c_radicand = 0;
+end
+
+if large_arc_flag ~= sweep_flag
+    temp = 1;
+else
+    temp = -1;
+end
+
+c_coef = temp * sqrt(c_radicand);
+
+transformed_center = [c_coef*rx*y1p/ry,...
+                      -c_coef*ry*x1p/rx];
+
+cxp = transformed_center(1);
+cyp = transformed_center(2);
+
+%Step #3: Compute center
+center = [cos(phi)*cxp - sin(phi)*cyp + (xy1(1)+xy2(1))/2,...
+    sin(phi)*cxp + cos(phi)*cyp + (xy1(2)+xy2(2))/2];
+
+cx = center(1);
+cy = center(2);
+
+
+
+%Step #4: Compute start/sweep angles
+%-----------------------------------------------
+%Start angle of the elliptical arc prior to the stretch and rotate operations.
+%Difference between the start and end angles
+
+start_vector = [(x1p-cxp)/rx, (y1p-cyp)/ry];
+theta1 = angleBetween([1,0],start_vector);
+
+end_vector = [(-x1p - cxp)/rx,(-y1p-cyp)/ry];
+
+delta_theta = angleBetween(start_vector,end_vector);
+
+%In other words, if fS = 0 and the right side of (eq. 5.6) is greater than
+%0, then subtract 360°, whereas if fS = 1 and the right side of (eq. 5.6)
+%is less than 0, then add 360°. In all other cases leave it as is.
+if (~sweep_flag && delta_theta > 0)
+    delta_theta = delta_theta - 2*pi;      
+elseif (sweep_flag && delta_theta < 0)
+    delta_theta = delta_theta + 2*pi;
+end
+
+%We use % instead of `mod(..)` because we want it to be -360deg to 360deg(but actually in radians)
+delta_theta = rem(delta_theta,2*pi);
+
+%The modulo operator, denoted by %, is an arithmetic operator. The modulo
+%division operator produces the remainder of an integer division which is
+%also called the modulus of the operation.
+
+%From http://www.w3.org/TR/SVG/implnote.html#ArcParameterizationAlternatives
+angle = theta1 + delta_theta*t;
+temp_x = rx*cos(angle);
+temp_y = ry*sin(angle);
+
+%EQ 3.1
+x = cos(phi)*temp_x - sin(phi)*temp_y + cx;
+y = sin(phi)*temp_x + cos(phi)*temp_y + cy;
+
+end
+
+function angle = angleBetween(v0,v1)
+
+    %acos(dot(v0,v1)/(norm(v0)*norm(v1)))
+
+    %p = v0(1)*v1(1) + v0(2)*v1(2);
+    %n = sqrt((v0(1)^2 + v0(2)^2)*(v1(1)^2 + v1(2)^2));
+    if v0(1)*v1(2) - v0(2)*v1(1) < 0
+        sign = -1;
+    else
+        sign = 1;
+    end
+
+    %Not sure how my example gave something with a small i
+    %floating point issue ...
+    %angle = sign*acos(p/n);
+    angle = sign*acos(dot(v0,v1)/(norm(v0)*norm(v1)));
+    %angle = real(angle);
+end
+%{
+private static double AngleBetween(Point v0, Point v1)
+{
+    var p = v0.X * v1.X + v0.Y * v1.Y;
+    var n = Math.Sqrt((Math.Pow(v0.X, 2) + Math.Pow(v0.Y, 2)) * (Math.Pow(v1.X, 2) + Math.Pow(v1.Y, 2)));
+    var sign = v0.X * v1.Y - v0.Y * v1.X < 0 ? -1 : 1;
+    return sign * Math.Acos(p / n);
+}
 %}

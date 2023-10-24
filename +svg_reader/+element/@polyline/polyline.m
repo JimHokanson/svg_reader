@@ -15,7 +15,13 @@ classdef polyline < svg_reader.element
     yes
     %}
 
-    %??? What is the point of pathLength?
+    %??? What is the point of pathLength? - I think this allows you
+    %to verify your numerical accuracy
+
+
+    %{
+
+    %}
 
     properties
         parent
@@ -32,15 +38,14 @@ classdef polyline < svg_reader.element
             obj.getAttributes(item);
             s = obj.attributes;
             
-            number_pattern = '-?\d+\.?\d+';
-            temp = regexp(s.points,number_pattern,'match');
-            temp2 = str2double(temp);
-            obj.points = [temp2(1:2:end)' temp2(2:2:end)'];
+            numbers = svg_reader.utils.extractListofNumbers(input_str);
+            %TODO: Check length, should be even
+            obj.points = [numbers(1:2:end)' numbers(2:2:end)'];
         end
         function render(obj)
-            c = svg_reader.utils.getColor(obj.attributes,'stroke',obj);
-            %TODO: Figure out width
-            line(obj.points(:,1),obj.points(:,2),'Color',c,'LineWidth',3)
+            x = obj.points(:,1);
+            y = obj.points(:,2);
+            svg_reader.utils.renderStroke(obj,x,y);
         end
     end
 end

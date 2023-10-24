@@ -10,6 +10,8 @@ function svg = loadExample(file_name)
 %
 %   Example
 %   -------
+%   svg_reader.loadExample()
+%
 %   s = svg_reader.loadExample('yellow_star')
 %   
 
@@ -18,18 +20,9 @@ temp = mfilename('fullpath');
 root = fileparts(fileparts(temp));
 example_root = fullfile(root,'examples');
 
-
-
-%TODO: Load this dynamically from disk
-example_list = {...
-    'cirle'
-    'yellow_star'
-    'orange_sun'
-    'invader'
-    'fill_example_01_mdn'
-    'fill_example_02_mdn'};
-
 if nargin == 0
+    d = dir(fullfile(example_root,'*.svg'));
+    example_list = {d.name}';
     disp(example_list);
     return
 end

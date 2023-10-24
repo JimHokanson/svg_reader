@@ -50,6 +50,7 @@ c = svg_reader.utils.getColor(elem.attributes,'stroke',elem);
 
 if isempty(c) || c(1) == -1
     p = [];
+    return
 end
 
 I = find(isnan(x));

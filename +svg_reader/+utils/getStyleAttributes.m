@@ -7,8 +7,8 @@ function s = getStyleAttributes(str)
 s = struct();
 prop_value_pairs = regexp(str,'([^:]+):([^;]+);','tokens');
 for i = 1:length(prop_value_pairs)
-    name = prop_value_pairs{i}{1};
-    value = prop_value_pairs{i}{2};
+    name = strtrim(prop_value_pairs{i}{1});
+    value = strtrim(prop_value_pairs{i}{2});
     try
     s.(name) = value;
     catch

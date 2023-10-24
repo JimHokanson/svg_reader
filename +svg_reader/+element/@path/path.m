@@ -5,6 +5,11 @@ classdef path < svg_reader.element
     %
     %   https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path
 
+    %{
+    svg = svg_reader.loadExample('starbucks');
+    svg.render()
+    %}
+
     properties
         parent
 
@@ -41,15 +46,8 @@ classdef path < svg_reader.element
         end
         function render(obj)
 
-%             persistent wtf
-%             if isempty(wtf)
-%                 wtf = 0;
-%             else
-%                 wtf = wtf + 1;
-%             end
-
             %TODO: Expose this ...
-            n_points_per_step = 20;
+            n_points_per_step = 100;
             [x,y] = obj.getXY(n_points_per_step);
             %TODO: Check for transform
 
@@ -84,18 +82,6 @@ classdef path < svg_reader.element
                 end
             end
 
-            svg_reader.utils.renderStroke(obj,x,y);
-
-%             c = svg_reader.utils.getColor(obj.attributes,'stroke',obj);
-% 
-%             %TODO: what is default if not explicitly None?
-%             %[] - missing
-%             %-1 - none
-%             if ~isempty(c) && c(1) ~= -1
-%                 %TODO: Handle linewidth
-%                 line(x,y,'Color',c,'LineWidth',3)
-%             end
-
             %either present or none (-1)
             c = svg_reader.utils.getColor(obj.attributes,'fill',obj);
             if c ~= -1
@@ -112,6 +98,8 @@ classdef path < svg_reader.element
                 %
                 %How do we control width
             end
+
+            svg_reader.utils.renderStroke(obj,x,y);
 
 
         end

@@ -7,11 +7,16 @@ classdef element < handle
     %   Elements
     %   --------
     %   svg_reader.element.g
+    %   svg_reader.image <- needs to be moved
     %   svg_reader.element.line
     %   svg_reader.element.path
     %   svg_reader.element.polyline
     %   svg_reader.element.style
     %   svg_reader.element.text
+    %
+    %   Paths and Shapes
+    %   ----------------
+    %   svg_reader.element.polyline
 
     
 
@@ -71,7 +76,8 @@ classdef element < handle
                 %   Note, this may not do anything if no relevant styles
                 %   are passed down
                 s = obj.attributes;
-                [s,changed_fields] = style_use.mergeStyles(s);
+                %Call to svg_reader.element.style.mergeStyles
+                [s,changed_fields] = style_use.mergeStyles(s,obj);
                 obj.attributes = s;
                 if ~isempty(changed_fields)
                     obj.updateAttributes(changed_fields);

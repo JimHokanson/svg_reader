@@ -58,6 +58,10 @@ if strcmp(color_string,'none')
 end
 
 if color_string(1) == '#'
+    cs = color_string;
+    if length(color_string) == 4
+       color_string = ['#' cs(2) cs(2) cs(3) cs(3) cs(4) cs(4)];
+    end
     r=hex2dec(color_string(2:3))/255;
     g=hex2dec(color_string(4:5))/255;
     b=hex2dec(color_string(6:7))/255;

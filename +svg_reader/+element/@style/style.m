@@ -5,7 +5,7 @@ classdef style < svg_reader.element
     %
     %   https://developer.mozilla.org/en-US/docs/Web/SVG/Element/style
     %
-    %   
+    %
 
     properties
         parent
@@ -56,11 +56,17 @@ classdef style < svg_reader.element
             %// too?
 
             style_value = obj.raw_value;
+            %TODO: Not sure if this works for anything complicated
+            style_value = regexprep(style_value,'/\*.*?\*/','');
 
 
-            results = regexp(obj.raw_value,'([^{]+){([^}]+)}','tokens');
+            results = regexp(style_value,'([^{]+){([^}]+)}','tokens');
             n_results = length(results);
             names = cell(1,n_results);
+            type = zeros(1,n_results);
+            %0 - id
+            %1 - class
+            %2 - element
             is_class = false(1,n_results);
             styles = cell(1,n_results);
             for i = 1:n_results
@@ -69,29 +75,33 @@ classdef style < svg_reader.element
                 %2: attributes
                 temp = strtrim(result{1});
                 if temp(1) == '.'
-                    is_class(i) = true;
+                    %class
+                    type(i) = 1;
+                    names{i} = temp(2:end);
                 elseif temp(1) == '#'
-                    %fine
+                    %ID
+                    names{i} = temp(2:end);
                 else
-                    %TODO: Allow elements
-                    %TODO: Acknowledge lack of support for
-                    %anything with a space or :
-                    %
-                    %Apparently this is valid: 
-                    %   svg:hover path
-                    %   yikes!
-                    error('Unrecognized style element: %s',temp)
+                    %element
+                    if any(temp == ' ')
+                        error('Unhandled case')
+                    else
+                        names{i} = temp;
+                        type(i) = 2;
+                    end
                 end
-                names{i} = temp(2:end);
+
                 styles{i} = svg_reader.utils.getStyleAttributes(result{2});
             end
 
-            obj.class_names = names(is_class);
-            obj.class_styles = styles(is_class);
-            obj.id_names = names(~is_class);
-            obj.id_styles = styles(~is_class);
+            obj.id_names = names(type == 0);
+            obj.id_styles = styles(type == 0);
+            obj.class_names = names(type == 1);
+            obj.class_styles = styles(type == 1);
+            obj.element_names = names(type == 2);
+            obj.element_styles = styles(type == 2);
         end
-        function [s,changed_fields] = mergeStyles(obj,s)
+        function [s,changed_fields] = mergeStyles(obj,s,elem)
             %
             %
             %   Inputs
@@ -102,7 +112,7 @@ classdef style < svg_reader.element
             %   --------
             %   svg_reader.element.applyStyle
             %
-            
+
 
             changed_fields = {};
 
@@ -117,7 +127,7 @@ classdef style < svg_reader.element
                     for i = 1:length(fn)
                         name = fn{i};
                         s.(name) = style_data.(name);
-                        changed_fields{end+1} = name;
+                        changed_fields{end+1} = name; %#ok<AGROW>
                     end
                 end
             end
@@ -130,11 +140,34 @@ classdef style < svg_reader.element
                     for i = 1:length(fn)
                         name = fn{i};
                         s.(name) = style_data.(name);
-                        changed_fields{end+1} = name;
+                        changed_fields{end+1} = name; %#ok<AGROW>
                     end
                 end
             end
-            
+
+            %TODO:
+            if ~isempty(obj.element_names)
+                temp = class(elem);
+                %class seems to always return fully resolved
+                % 'svg_reader.element.svg'
+                %   want just 'svg' (last bit)
+                I = find(temp == '.',1,'last');
+                if ~isempty(I)
+                    class_simple_name = temp(I+1:end);
+                else
+                    class_simple_name = temp;
+                end
+                mask = strcmp(class_simple_name,obj.element_names);
+                if any(mask)
+                    style_data = obj.element_styles{mask};
+                    fn = fieldnames(style_data);
+                    for i = 1:length(fn)
+                        name = fn{i};
+                        s.(name) = style_data.(name);
+                        changed_fields{end+1} = name; %#ok<AGROW>
+                    end
+                end
+            end
         end
         function render(obj)
             %NOOP
