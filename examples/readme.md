@@ -2,6 +2,7 @@ file sources:
 
 - **anchor_horizontal.svg** from https://raw.githubusercontent.com/python-pillow/Pillow/master/docs/resources/anchor_horizontal.svg
 - **circle.svg** from https://developer.mozilla.org/en-US/docs/Web/SVG/Element/desc
+- **kiwi.svg** from https://css-tricks.com/using-svg/
 - **invader.svg** FROM https://www.sitepoint.com/css-with-svg/
   - Uses animation (not yet supported)
 - **fill_ex_01.svg** FROM https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/fill-rule

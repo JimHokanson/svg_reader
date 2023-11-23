@@ -36,6 +36,9 @@ else
 end
 
 file_path = fullfile(example_root,file_name);
+if ~exist(file_path,'file')
+error('Requested example: %s, does not exist',file_name)
+end
 
 svg = svg_reader.read(file_path);
 

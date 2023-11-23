@@ -1,8 +1,9 @@
-function p = renderStroke(elem,x,y)
+function p = renderStroke(elem,x,y,render_options)
 %
 %   
 %   svg_reader.utils.renderStroke(elem,x,y)
 %
+%   Wrapper for (TODO: rename called function)
 %   
 %   Inputs
 %   ------
@@ -14,7 +15,7 @@ function p = renderStroke(elem,x,y)
 %   --------
 %   svg_reader.element.path
 %   svg_reader.element.polygon
-%   svg_reader.utils.genFixedWidthLine
+%   svg_reader.utils.strokeToPolyshape
 
 %https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke
 %
@@ -88,8 +89,6 @@ else
     stroke_width = 1;
 end
 
-
-
 x_orig = x;
 y_orig = y;
 n_starts = length(starts);
@@ -97,10 +96,17 @@ p_all = cell(1,n_starts);
 for i = 1:n_starts
     x = x_orig(starts(i):stops(i));
     y = y_orig(starts(i):stops(i));
-    p = svg_reader.utils.genFixedWidthLine(x,y,stroke_width,line_join,line_cap);
-    h = plot(p);
-    h.FaceColor = c(1:3);
-    h.FaceAlpha = c(4);
+    if render_options.strokes_as_fills
+        p = svg_reader.utils.strokeToPolyshape(x,y,stroke_width,line_join,line_cap);
+        %p_root
+        %'MATLAB:polyshape:repairedBySimplify'
+        h = plot(p);
+        h.FaceColor = c(1:3);
+        h.FaceAlpha = c(4);
+    else
+        p = plot(x,y,'LineWidth',render_options.line_width);
+        p.Color = c(1:3);
+    end
 end
 
 p = [p_all{:}];

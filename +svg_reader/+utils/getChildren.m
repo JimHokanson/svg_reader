@@ -1,6 +1,12 @@
-function children = getChildren(item,parent_obj)
+function children = getChildren(item,parent_obj,read_options)
 %
-%   children = svg_reader.utils.getChildren(item)
+%   children = svg_reader.utils.getChildren(item,parent_obj,read_options)
+%
+%   Inputs
+%   ------
+%   item
+%   parent_obj
+%   read_options : svg_reader.read_options
 
 parent = parent_obj;
 items = item.getChildNodes();
@@ -16,29 +22,33 @@ for i = 1:n
             child_obj = [];
             keep_mask(i) = false;
         case 'desc'
-            child_obj = svg_reader.element.desc(item,parent);
+            child_obj = svg_reader.element.desc(item,parent,read_options);
+        case 'ellipse'
+            child_obj = svg_reader.element.ellipse(item,parent,read_options);
+        case 'filter'
+            child_obj = svg_reader.element.filter(item,parent,read_options);
         case 'g'
-            child_obj = svg_reader.element.g(item,parent);
+            child_obj = svg_reader.element.g(item,parent,read_options);
         case 'image'
-            child_obj = svg_reader.image(item,parent);
+            child_obj = svg_reader.element.image(item,parent,read_options);
         case 'line'
-            child_obj = svg_reader.element.line(item,parent);
+            child_obj = svg_reader.element.line(item,parent,read_options);
         case 'path'
-            child_obj = svg_reader.element.path(item,parent);
+            child_obj = svg_reader.element.path(item,parent,read_options);
         case 'polygon'
-            child_obj = svg_reader.element.polygon(item,parent);
+            child_obj = svg_reader.element.polygon(item,parent,read_options);
         case 'polyline'
-            child_obj = svg_reader.element.polyline(item,parent);
+            child_obj = svg_reader.element.polyline(item,parent,read_options);
         case 'script'
-            child_obj = svg_reader.element.script(item,parent);
+            child_obj = svg_reader.element.script(item,parent,read_options);
         case 'text'
-            child_obj = svg_reader.element.text(item,parent);
+            child_obj = svg_reader.element.text(item,parent,read_options);
         case '#text'
             child_obj = [];
             keep_mask(i) = false;
         case 'style'
             %Note sure why no #
-            child_obj = svg_reader.element.style(item,parent);
+            child_obj = svg_reader.element.style(item,parent,read_options);
         otherwise
             keyboard
     end

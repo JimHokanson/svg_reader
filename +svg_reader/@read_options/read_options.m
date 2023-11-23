@@ -2,6 +2,11 @@ classdef read_options
     %
     %   Class:
     %   svg_reader.read_options
+    %
+    %   See Also
+    %   --------
+    %   svg_reader.render_options
+    %
 
     properties
         %NYI
@@ -9,7 +14,6 @@ classdef read_options
         %- warning
         %- silent
         unsupported = 'error'
-        
     end
 
     methods

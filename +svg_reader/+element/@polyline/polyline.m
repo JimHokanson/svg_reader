@@ -33,19 +33,21 @@ classdef polyline < svg_reader.element
     end
 
     methods
-        function obj = polyline(item,parent)
+        function obj = polyline(item,parent,read_options)
             obj.parent = parent;
             obj.getAttributes(item);
             s = obj.attributes;
             
-            numbers = svg_reader.utils.extractListofNumbers(input_str);
-            %TODO: Check length, should be even
+            numbers = svg_reader.utils.extractListofNumbers(s.points);
+            if mod(length(numbers),2) ~= 0
+                error('Length of numbers for a polyline must be even')
+            end
             obj.points = [numbers(1:2:end)' numbers(2:2:end)'];
         end
-        function render(obj)
+        function render(obj,render_options)
             x = obj.points(:,1);
             y = obj.points(:,2);
-            svg_reader.utils.renderStroke(obj,x,y);
+            svg_reader.utils.renderStroke(obj,x,y,render_options);
         end
     end
 end

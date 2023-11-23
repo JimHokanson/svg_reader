@@ -9,12 +9,12 @@ classdef script < svg_reader.element
     end
 
     methods
-        function obj = script(item,parent)
+        function obj = script(item,parent,read_options)
             obj.parent = parent;
             obj.getAttributes(item);
             obj.value = char(item.getTextContent());
         end
-        function render(obj)
+        function render(obj,render_options)
             %do nothing
         end
     end

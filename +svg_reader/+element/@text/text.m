@@ -9,12 +9,12 @@ classdef text < svg_reader.element
     end
 
     methods
-        function obj = text(item,parent)
+        function obj = text(item,parent,read_options)
             obj.parent = parent;
             obj.getAttributes(item);
             obj.value = char(item.getTextContent());
         end
-        function render(obj)
+        function render(obj,render_options)
             x = 0;
             y = 0;
             if isfield(obj.attributes,'transform')

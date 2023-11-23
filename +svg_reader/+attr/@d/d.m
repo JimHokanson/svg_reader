@@ -69,6 +69,76 @@ classdef d < handle
         end
         function [x,y] = getXY(obj,n_points_per_step)
 
+
+            %TODO: Working on populating n_points
+            %
+
+            n_points = 0;
+            ny = 0;
+            %TODO: Optimization, estimate # of points (or calculate)
+            %and preinitialize
+            n_commands = length(obj.commands);
+            for i = 1:n_commands
+                inputs = obj.command_inputs{i};
+                switch obj.commands{i}
+                    case 'M'
+                        %(x, y)+
+                        if i ~= 1
+                            n_points = n_points + 1;
+                        end
+                        n_points = n_points + (length(inputs)-2)/2;
+                    case 'm'
+                        %(dx, dy)+
+                        if i ~= 1
+                            n_points = n_points + 1;
+                        end
+                        n_points = n_points + (length(inputs)-2)/2;
+                    case 'L'
+                        n_points = n_points + length(inputs)/2;
+                    case 'l'
+                        n_points = n_points + length(inputs)/2;
+                    case 'H'
+                        n_points = n_points + length(inputs);
+                    case 'h'
+                        n_points = n_points + length(inputs);
+                    case 'V'
+                        n_points = n_points + length(inputs);
+                    case 'v'
+                        %dy+
+                        n_points = n_points + length(inputs);
+                    case 'C'
+                        n_points = n_points + length(inputs)/6 * n_points_per_step;
+                    case 'c'
+                        n_points = n_points + length(inputs)/6 * n_points_per_step;
+                    case 'S'
+                        n_points = n_points + length(inputs)/4 * n_points_per_step;
+                    case 's'
+                        n_points = n_points + length(inputs)/4 * n_points_per_step;
+                    case 'Q'
+                        keyboard
+                    case 'q'
+                        keyboard
+                    case 'T'
+                        keyboard
+                    case 't'
+                        keyboard
+                    case 'A'
+                        n_points = n_points + length(inputs)/7 * n_points_per_step;
+                    case 'a'
+                        n_points = n_points + length(inputs)/7 * n_points_per_step;
+                    case {'Z','z'}
+                        n_points = n_points + 1;
+                    otherwise
+                        error('Unrecognized command: %s',obj.commands{i})
+                end
+            end
+
+            
+            %x = zeros(1,n_points);
+            %y = zeros(1,n_points);
+            ip = 0;
+            %n_points
+
             %keyboard
             rootx = 0;
             rooty = 0;
@@ -85,6 +155,7 @@ classdef d < handle
                     case 'M'
                         %(x, y)+
                         if i ~= 1
+                            ip = ip + 1;
                             %Need NaNs to break up
                             x = [x NaN]; %#ok<AGROW>
                             y = [y NaN]; %#ok<AGROW>
@@ -236,6 +307,7 @@ classdef d < handle
 
 
                         %(x2,y2, x,y)+
+                        t = linspace(0, 1, n_points_per_step);
                         for j = 1:4:length(inputs)
                             P0x = cx;
                             P0y = cy;
@@ -265,6 +337,7 @@ classdef d < handle
                         end
                     case 's'
                         %(dx2,dy2, dx,dy)+
+                        t = linspace(0, 1, n_points_per_step);
                         for j = 1:4:length(inputs)
                             P0x = cx;
                             P0y = cy;
@@ -397,10 +470,7 @@ end
 
 %}
 
-%https://github.com/zHaytam/SvgPathProperties/blob/main/SvgPathProperties/ArcCommand.cs#L23
 function [x,y] = arc(xy1, rx,ry, angle, large_arc_flag, sweep_flag, xy2, t)
-
-%(Point p0, double rx, double ry, double xAxisRotation, bool largeArcFlag, bool sweepFlag, Point p1, double t)
 %from: https://github.com/zHaytam/SvgPathProperties/blob/main/SvgPathProperties/ArcCommand.cs
 % In accordance to: http://www.w3.org/TR/SVG/implnote.html#ArcOutOfRangeParameters
 

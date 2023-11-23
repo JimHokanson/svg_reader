@@ -1,11 +1,17 @@
 classdef image < svg_reader.element
     %
+    %   Class:
+    %   svg_reader.element.image
+    %
+    %   https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image
+    %
+    %   See Also
+    %   --------
+    %   svg_reader.element.g
     %   
-
-    %https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image
-    
-    %The only image formats SVG software must support are JPEG, PNG, and 
-    %other SVG files. Animated GIF behavior is undefined.
+    %
+    %   The only image formats SVG software must support are JPEG, PNG, and 
+    %   other SVG files. Animated GIF behavior is undefined.
     
     properties
         parent
@@ -13,8 +19,12 @@ classdef image < svg_reader.element
         format
     end
 
+    properties
+        h_image
+    end
+
     methods
-        function obj = image(item,parent)
+        function obj = image(item,parent,read_options)
             obj.parent = parent;
             obj.getAttributes(item);
             s = obj.attributes;
@@ -37,7 +47,7 @@ classdef image < svg_reader.element
             end
             %data = obj.getImageData();
         end
-        function render(obj)
+        function render(obj,render_options)
             %What's the viewport???
             %
             %   Don't worry about for now
@@ -52,7 +62,13 @@ classdef image < svg_reader.element
 
             %x = 0:(size(data,2)-1);
             %y = 0:(size(data,1)-1);
-            image(x,y,data);
+            obj.h_image = image(x,y,data);
+        end
+        function hide(obj)
+
+        end
+        function show(obj)
+
         end
         function data = getImageData(obj)
             %TODO: This should be cached locally

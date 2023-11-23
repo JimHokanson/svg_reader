@@ -18,7 +18,7 @@ classdef path < svg_reader.element
     end
 
     methods
-        function obj = path(item,parent)
+        function obj = path(item,parent,read_options)
             obj.parent = parent;
             obj.getAttributes(item);
             if isfield(obj.attributes,'style')
@@ -44,11 +44,29 @@ classdef path < svg_reader.element
             %}
             obj.d = svg_reader.attr.d(obj.attributes.d,obj);
         end
-        function render(obj)
+        function render(obj,render_options)
+            %
+            %   Inputs
+            %   ------
+            %   render_options : svg_reader.render_options
 
-            %TODO: Expose this ...
-            n_points_per_step = 100;
+            n_points_per_step = render_options.getNPointsPerPath(obj);
             [x,y] = obj.getXY(n_points_per_step);
+
+            if isempty(x)
+                %This was seen in Illustrator file
+                %Are the pen commands saved between path calls?
+                %e.g., is MX,Y useful if only thing present?
+                %can next pen call take off from X,Y??
+                %
+                %Unclear, was last point that was relative
+                %
+                %followed by a line, polyline, and text objects
+                %
+                %TODO: Should verify there is no holdover ...
+                return
+            end
+
             %TODO: Check for transform
 
             %Might see duplicate points
@@ -70,9 +88,13 @@ classdef path < svg_reader.element
             n_starts = length(starts);
             cell_x = cell(1,n_starts);
             cell_y = cell(1,n_starts);
+            h_all = cell(1,n_starts);
             for i = 1:n_starts
                 x = x_orig(starts(i):stops(i));
                 y = y_orig(starts(i):stops(i));
+                if isempty(x)
+                    keyboard
+                end
                 if fpSame(x(1),x(end)) && fpSame(y(1),y(end))
                     cell_x{i} = x(2:end);
                     cell_y{i} = y(2:end);
@@ -80,7 +102,16 @@ classdef path < svg_reader.element
                     cell_x{i} = x;
                     cell_y{i} = y;
                 end
+                %h_all{i} = svg_reader.utils.renderFill(obj,cell_x{i},cell_y{i});
+                %keyboard
             end
+           
+            %JAH: Not sure why these need to be done all at once but
+            %they do. See Starbucks example ...
+            %
+            %   Basically this allows the creation of holes
+            %
+            %   Should we move this code to inside the function????
 
             %either present or none (-1)
             c = svg_reader.utils.getColor(obj.attributes,'fill',obj);
@@ -99,13 +130,20 @@ classdef path < svg_reader.element
                 %How do we control width
             end
 
-            svg_reader.utils.renderStroke(obj,x,y);
+            svg_reader.utils.renderStroke(obj,x,y,render_options);
 
 
         end
         function [x,y] = getXY(obj,n_points_per_step)
             %
+            %   [x,y] = getXY(obj,n_points_per_step)
             %
+            %   Inputs
+            %   ------
+            %   
+            %   See Also
+            %   --------
+            %   svg_reader.attr.d.getXY
 
             %See: svg_reader.attr.d.getXY
             [x,y] = obj.d.getXY(n_points_per_step);

@@ -5,7 +5,9 @@ classdef style < svg_reader.element
     %
     %   https://developer.mozilla.org/en-US/docs/Web/SVG/Element/style
     %
-    %
+    %   See Also
+    %   --------
+    %   svg_reader.utils.getStyleAttributes
 
     properties
         parent
@@ -19,7 +21,7 @@ classdef style < svg_reader.element
     end
 
     methods
-        function obj = style(item,parent)
+        function obj = style(item,parent,read_options)
             obj.parent = parent;
             obj.getAttributes(item);
             obj.raw_value = strtrim(char(item.getTextContent()));
@@ -58,6 +60,7 @@ classdef style < svg_reader.element
             style_value = obj.raw_value;
             %TODO: Not sure if this works for anything complicated
             style_value = regexprep(style_value,'/\*.*?\*/','');
+            style_value = regexprep(style_value,'^\s*//.*?$','','lineanchors');
 
 
             results = regexp(style_value,'([^{]+){([^}]+)}','tokens');
@@ -169,7 +172,7 @@ classdef style < svg_reader.element
                 end
             end
         end
-        function render(obj)
+        function render(obj,render_options)
             %NOOP
         end
         function applyStyle(obj,other_style)

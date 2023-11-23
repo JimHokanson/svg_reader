@@ -22,7 +22,15 @@ function numbers = extractListofNumbers(input_str)
 %   ,
 %   . (if second . in a number)
 
+numeric_pattern = '[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?'; % Matches numbers in various formats
 
+strings = regexp(input_str,numeric_pattern,'match');
+
+numbers = str2double(strings);
+
+end
+
+function old_code
 
 %
 %uh-oh, could have E sign as well
@@ -109,6 +117,8 @@ end
 
 starts = find(is_start);
 stops = [starts(2:end)-1 length(remainder)];
+
+strings = arrayfun(@(x,y)remainder(x:y),starts,stops,'un',0);
 
 
 n_numbers = length(starts);

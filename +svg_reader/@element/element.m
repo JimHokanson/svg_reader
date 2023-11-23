@@ -6,6 +6,7 @@ classdef element < handle
     %
     %   Elements
     %   --------
+    %   svg_reader.element.desc
     %   svg_reader.element.g
     %   svg_reader.image <- needs to be moved
     %   svg_reader.element.line

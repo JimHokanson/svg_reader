@@ -7,39 +7,67 @@ classdef svg < svg_reader.element
     %   --------
     %   svg_reader.read
     %   svg_reader.element
-    %
+    %   svg_reader.read_options
+    %   svg_reader.render_options
     %
     %   Elements
     %   --------
     %   See running list in: svg_reader.element
+    %
+    %   Examples
+    %   --------
+    %   svg_reader.loadExample('invader')
+    %   svg_reader.loadExample('starbucks')
 
     properties
         file_path
+        
+        %cell
         children
+
+        %table
+        %.index
+        %.class_name
+        %.id (if present)
         t
     end
 
     methods
         function obj = svg(item,file_path,read_options)
+            %
+            %   Inputs
+            %   ------
+            %   item
+            %   file_path
+            %   read_options : svg_reader.read_options
 
             obj.file_path = file_path;
 
             obj.getAttributes(item);
             s = svg_reader.utils.getAttributes(item);
             obj.attributes = s;
-            obj.children = svg_reader.utils.getChildren(item,obj);
+
+            %Parse children
+            %--------------
+            obj.children = svg_reader.utils.getChildren(item,obj,read_options);
             
             %Build table
             %-----------
-            %index, class_names
+            %.index
+            %.class_name
+            %.id (if present)
             
             fh = @svg_reader.utils.getPartialClassName;
             class_name = cellfun(fh,obj.children,'un',0)';
+
             fh = @svg_reader.utils.getIDifPresent;
             id = cellfun(fh,obj.children,'un',0)';
+
             index = (1:length(class_name))';
             obj.t = table(index,class_name,id);
 
+            %Viewbox handling
+            %----------------
             if isfield(obj.attributes,'viewBox')
                 temp = obj.attributes.viewBox;
                 obj.attributes.viewBox = str2double(strsplit(temp,' '));
@@ -48,7 +76,9 @@ classdef svg < svg_reader.element
         function render(obj,varargin)
 
             if nargin == 1
-                options = svg_reader.render_options;
+                render_options = svg_reader.render_options;
+            elseif isobject(varargin{1})
+                render_options = varargin{1};
             end
 
             %TODO: reset hold state after render
@@ -57,7 +87,7 @@ classdef svg < svg_reader.element
             set(gca,'YDir','reverse')
             for i = 1:length(obj.children)
                 child = obj.children{i};
-                child.render();
+                child.render(render_options);
             end
 
             %ViewBox

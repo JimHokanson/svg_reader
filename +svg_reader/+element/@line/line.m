@@ -4,6 +4,11 @@ classdef line < svg_reader.element
     %   svg_reader.element.line
     %
     %   https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
+    %
+    %
+    %   Example
+    %   -------
+    %   
 
     %{
     x1 Defines the x-axis coordinate of the line starting point. Value
@@ -33,17 +38,15 @@ classdef line < svg_reader.element
     end
 
     methods
-        function obj = line(item,parent)
+        function obj = line(item,parent,read_options)
             obj.parent = parent;
             obj.getAttributes(item);
             s = obj.attributes;
             obj.x = str2double({s.x1 s.x2});
             obj.y = str2double({s.y1 s.y2});
         end
-        function render(obj)
-            c = svg_reader.utils.getColor(obj.attributes,'stroke',obj);
-            %TODO: figure out line width
-            line(obj.x,obj.y,'Color',c,'LineWidth',3)
+        function render(obj,render_options)
+            svg_reader.utils.renderStroke(obj,obj.x,obj.y,render_options);
         end
     end
 end
