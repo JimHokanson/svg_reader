@@ -16,5 +16,11 @@ classdef desc < svg_reader.element
         function render(obj)
             %NOOP
         end
+        function hide(obj)
+
+        end
+        function show(obj)
+
+        end
     end
 end

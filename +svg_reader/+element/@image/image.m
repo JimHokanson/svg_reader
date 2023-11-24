@@ -65,10 +65,14 @@ classdef image < svg_reader.element
             obj.h_image = image(x,y,data);
         end
         function hide(obj)
-
+            if ~isempty(obj.h_image) && isvalid(obj.h_image)
+                obj.h_image.Visible = 'off';
+            end
         end
         function show(obj)
-
+            if ~isempty(obj.h_image) && isvalid(obj.h_image)
+                obj.h_image.Visible = 'on';
+            end
         end
         function data = getImageData(obj)
             %TODO: This should be cached locally

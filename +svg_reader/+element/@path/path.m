@@ -15,6 +15,9 @@ classdef path < svg_reader.element
 
         %svg_reader.attr.d
         d svg_reader.attr.d
+
+        h_fill
+        h_stroke
     end
 
     methods
@@ -43,6 +46,22 @@ classdef path < svg_reader.element
             ClosePath: Z, z
             %}
             obj.d = svg_reader.attr.d(obj.attributes.d,obj);
+        end
+        function hide(obj)
+            if ~isempty(obj.h_stroke) && isvalid(obj.h_stroke)
+                obj.h_stroke.Visible = 'off';
+            end
+            if ~isempty(obj.h_fill) && isvalid(obj.h_fill)
+                obj.h_fill.Visible = 'off';
+            end
+        end
+        function show(obj)
+            if ~isempty(obj.h_stroke) && isvalid(obj.h_stroke)
+                obj.h_stroke.Visible = 'on';
+            end
+            if ~isempty(obj.h_fill) && isvalid(obj.h_fill)
+                obj.h_fill.Visible = 'on';
+            end
         end
         function render(obj,render_options)
             %
@@ -120,17 +139,20 @@ classdef path < svg_reader.element
                 %'MATLAB:polyshape:repairedBySimplify'
                 s = warning;
                 warning('off','MATLAB:polyshape:repairedBySimplify');
+                warning('off','MATLAB:polyshape:boundary3Points');
                 p = polyshape(cell_x,cell_y,'KeepCollinearPoints',true);
                 warning(s);
 
                 %disp(wtf)
-                plot(p,'FaceColor',c(1:3),'FaceAlpha',c(4));
+                obj.h_fill = plot(p,'FaceColor',c(1:3),'FaceAlpha',c(4));
                 %Why not edge color instead of boundary line?
                 %
                 %How do we control width
+            else
+                obj.h_fill = [];
             end
 
-            svg_reader.utils.renderStroke(obj,x,y,render_options);
+            obj.h_stroke = svg_reader.utils.renderStroke(obj,x,y,render_options);
 
 
         end

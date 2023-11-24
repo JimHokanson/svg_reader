@@ -35,6 +35,7 @@ classdef line < svg_reader.element
         parent
         x
         y
+        h_stroke
     end
 
     methods
@@ -46,7 +47,17 @@ classdef line < svg_reader.element
             obj.y = str2double({s.y1 s.y2});
         end
         function render(obj,render_options)
-            svg_reader.utils.renderStroke(obj,obj.x,obj.y,render_options);
+            obj.h_stroke = svg_reader.utils.renderStroke(obj,obj.x,obj.y,render_options);
+        end
+        function hide(obj)
+            if ~isempty(obj.h_stroke) && isvalid(obj.h_stroke)
+                obj.h_stroke.Visible = 'off';
+            end
+        end
+        function show(obj)
+            if ~isempty(obj.h_stroke) && isvalid(obj.h_stroke)
+                obj.h_stroke.Visible = 'on';
+            end
         end
     end
 end

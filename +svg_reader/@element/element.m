@@ -7,16 +7,23 @@ classdef element < handle
     %   Elements
     %   --------
     %   svg_reader.element.desc
+    %   svg_reader.element.ellipse
+    %   svg_reader.element.filter
     %   svg_reader.element.g
-    %   svg_reader.image <- needs to be moved
+    %   svg_reader.element.image
     %   svg_reader.element.line
     %   svg_reader.element.path
     %   svg_reader.element.polyline
+    %   svg_reader.element.script
     %   svg_reader.element.style
+    %   svg_reader.element.svg
     %   svg_reader.element.text
     %
     %   Paths and Shapes
     %   ----------------
+    %   svg_reader.element.ellipse
+    %   svg_reader.element.line
+    %   svg_reader.element.path
     %   svg_reader.element.polyline
 
     
@@ -41,6 +48,10 @@ classdef element < handle
             s = svg_reader.utils.getAttributes(item);
             obj.attributes = s;
             obj.updateAttributes();
+        end
+        function out = getElementsOfType(obj,element_type)
+            %NOOP
+            out = {};
         end
         function updateAttributes(obj,changed_fields)
             if nargin == 1

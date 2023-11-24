@@ -16,9 +16,16 @@ classdef render_options
 
         %true - uses fills so that stroke width is tied to image width
         %false - use lines (much faster)
-        strokes_as_fills = true;
+        strokes_as_fills = true
 
-        line_width = 2;
+        %This is only used if 'strokes_as_fills' = false
+        line_width = 2
+
+        %Which axes to target when rendering
+        ax = []
+        
+        apply_transforms = true
+
     end
 
     methods
@@ -29,6 +36,10 @@ classdef render_options
             %   value = getNPointsPerPath(obj,path_obj,x,y)
             %
             %   value = getNPointsPerPath(obj,path_obj)
+            %
+            %   Still not really sure what I want here ...
+
+
             value = obj.n_points_per_path;
         end
     end

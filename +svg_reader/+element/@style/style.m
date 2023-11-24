@@ -172,6 +172,12 @@ classdef style < svg_reader.element
                 end
             end
         end
+        function hide(obj)
+            keyboard
+        end
+        function show(obj)
+            keyboard
+        end
         function render(obj,render_options)
             %NOOP
         end

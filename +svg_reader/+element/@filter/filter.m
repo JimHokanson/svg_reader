@@ -18,5 +18,11 @@ classdef filter < svg_reader.element
             %NOT YET IMPLEMENTED
 
         end
+        function hide(obj)
+            keyboard
+        end
+        function show(obj)
+            keyboard
+        end
     end
 end

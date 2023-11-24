@@ -6,6 +6,7 @@ classdef text < svg_reader.element
     properties
         parent
         value
+        h_text
     end
 
     methods
@@ -22,7 +23,17 @@ classdef text < svg_reader.element
             end
             %TODO: Font size, color, how to place
             %   SVG font model position vs MATLAB?
-            text(x,y,obj.value)
+            obj.h_text = text(x,y,obj.value,'Clipping','on');
+        end
+        function hide(obj)
+            if ~isempty(obj.h_text) && isvalid(obj.h_text)
+                obj.h_text.Visible = 'on';
+            end
+        end
+        function show(obj)
+            if ~isempty(obj.h_text) && isvalid(obj.h_text)
+                obj.h_text.Visible = 'on';
+            end
         end
     end
 end

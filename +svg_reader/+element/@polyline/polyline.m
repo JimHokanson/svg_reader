@@ -30,6 +30,7 @@ classdef polyline < svg_reader.element
         %  x2 y2;
         %  etc. ]
         points
+        h_stroke
     end
 
     methods
@@ -44,10 +45,20 @@ classdef polyline < svg_reader.element
             end
             obj.points = [numbers(1:2:end)' numbers(2:2:end)'];
         end
+        function hide(obj)
+            if ~isempty(obj.h_stroke) && isvalid(obj.h_stroke)
+                obj.h_stroke.Visible = 'off';
+            end
+        end
+        function show(obj)
+            if ~isempty(obj.h_stroke) && isvalid(obj.h_stroke)
+                obj.h_stroke.Visible = 'on';
+            end
+        end
         function render(obj,render_options)
             x = obj.points(:,1);
             y = obj.points(:,2);
-            svg_reader.utils.renderStroke(obj,x,y,render_options);
+            obj.h_stroke = svg_reader.utils.renderStroke(obj,x,y,render_options);
         end
     end
 end

@@ -107,10 +107,9 @@ for i = 1:n_starts
         p = plot(x,y,'LineWidth',render_options.line_width);
         p.Color = c(1:3);
     end
+    p_all{i} = p;
 end
 
 p = [p_all{:}];
-
-
 
 end

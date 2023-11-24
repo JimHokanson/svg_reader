@@ -18,6 +18,7 @@ classdef ellipse < svg_reader.element
        cy
        rx
        ry
+       h_fill
     end
 
     methods
@@ -41,9 +42,13 @@ classdef ellipse < svg_reader.element
             x = obj.cx + obj.rx * cos(theta);
             y = obj.cy + obj.ry * sin(theta);
 
-            svg_reader.utils.renderFill(obj,x,y);
-
-            
+            h_fill = svg_reader.utils.renderFill(obj,x,y);
+        end
+        function hide(obj)
+            keyboard
+        end
+        function show(obj)
+            keyboard
         end
     end
 end

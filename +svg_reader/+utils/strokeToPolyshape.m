@@ -192,9 +192,14 @@ for i = 1:n_runs
     %}
 
 
+    %Note, we can make this an error instead of a warning
+    %
+    %
     %warning('error', 'mycomponent:myMessageID')
     %https://stackoverflow.com/questions/35827109/how-to-catch-warning-in-matlab
-    %'MATLAB:polyshape:repairedBySimplify'
+    %
+    %   warning_ID
+    % 'MATLAB:polyshape:repairedBySimplify'
     lastwarn('');
     xy = [new_ul; new_ll(end:-1:1,:)];
     p2 = polyshape(xy);
@@ -208,6 +213,10 @@ for i = 1:n_runs
         plot(xy(:,1),xy(:,2),'ro-')
         hold off
         %}
+
+        %This seems to happen for small steps (small deltas relative to the
+        %radius)
+
         xy = [new_ul; new_ll];
         p2 = polyshape(xy);
         %keyboard

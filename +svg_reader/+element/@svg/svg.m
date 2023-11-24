@@ -73,21 +73,50 @@ classdef svg < svg_reader.element
                 obj.attributes.viewBox = str2double(strsplit(temp,' '));
             end
         end
-        function render(obj,varargin)
-
-            if nargin == 1
-                render_options = svg_reader.render_options;
-            elseif isobject(varargin{1})
-                render_options = varargin{1};
-            end
-
-            %TODO: reset hold state after render
-            hold on
-            axis equal
-            set(gca,'YDir','reverse')
+        function out = getElementsOfType(obj,element_type)
+            out = {};
             for i = 1:length(obj.children)
                 child = obj.children{i};
-                child.render(render_options);
+                temp = child.getElementsOfType(element_type);
+                out = [out temp]; %#ok<AGROW> 
+            end
+            out = [out{:}];
+        end
+        function render(obj,varargin)
+            %x Renders the scene
+            %
+            %   render(obj,varargin)
+            %
+            %   Note not all rendering is supported
+            %
+            %   Examples
+            %   --------
+            %   TODO
+            %   
+
+            if nargin == 1
+                ro = svg_reader.render_options;
+            elseif isobject(varargin{1})
+                ro = varargin{1};
+            else
+                ro = svg_reader.render_options;
+                ro = svg_reader.utils.processVarargin(ro,varargin);
+            end
+
+            if isempty(ro.ax)
+                h_axes = gca;
+            else
+                h_axes = ro.ax;
+            end
+
+            hold_flag = ishold(h_axes);
+            axes(h_axes)
+            hold(h_axes,'on')
+            axis equal
+            set(h_axes,'YDir','reverse')
+            for i = 1:length(obj.children)
+                child = obj.children{i};
+                child.render(ro);
             end
 
             %ViewBox
@@ -95,12 +124,14 @@ classdef svg < svg_reader.element
                 value = obj.attributes.viewBox;
                 xlim = [value(1) value(1) + value(3)];
                 ylim = [value(2) value(2) + value(4)];
-                set(gca,'XLim',xlim,'YLim',ylim)
+                set(h_axes,'XLim',xlim,'YLim',ylim)
             end
 
-                    
+            if ~hold_flag
+                hold(h_axes,'off')
+            end
 
-        
+            set(h_axes,'XTick',[],'YTick',[])
         end
     end
 end

@@ -39,6 +39,20 @@ classdef g < svg_reader.element
             index = (1:length(class_name))';
             obj.t = table(index,class_name,id);
         end
+        function out = getElementsOfType(obj,element_type)
+
+            mask = strcmp(obj.t.class_name,element_type);
+            out = obj.children(mask);
+
+            mask = strcmp(obj.t.class_name,'g');
+            g_indices = find(mask);
+            for i = 1:length(g_indices)
+                index = g_indices(i);
+                child = obj.children{index};
+                temp = child.getElementsOfType(element_type);
+                out = [out temp]; %#ok<AGROW> 
+            end
+        end
         function render(obj,render_options)
             for i = 1:length(obj.children)
                 child = obj.children{i};
@@ -48,7 +62,7 @@ classdef g < svg_reader.element
         function hide(obj)
             for i = 1:length(obj.children)
                 child = obj.children{i};
-                child.show();
+                child.hide();
             end            
         end
         function show(obj)

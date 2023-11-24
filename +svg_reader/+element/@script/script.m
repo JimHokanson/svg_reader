@@ -17,5 +17,11 @@ classdef script < svg_reader.element
         function render(obj,render_options)
             %do nothing
         end
+        function hide(obj)
+            keyboard
+        end
+        function show(obj)
+            keyboard
+        end
     end
 end
