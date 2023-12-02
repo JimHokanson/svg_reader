@@ -2,6 +2,8 @@ classdef text < svg_reader.element
     %
     %   Class:
     %   svg_reader.element.text
+    %
+    %   https://developer.mozilla.org/en-US/docs/Web/SVG/Element/text
 
     properties
         parent
@@ -16,9 +18,13 @@ classdef text < svg_reader.element
             obj.value = char(item.getTextContent());
         end
         function render(obj,render_options)
+            arguments
+                obj svg_reader.element.text
+                render_options svg_reader.render_options
+            end
             x = 0;
             y = 0;
-            if isfield(obj.attributes,'transform')
+            if isfield(obj.attributes,'transform') && render_options.apply_transforms
                 [x,y] = obj.attributes.transform.applyTransform(0,0);
             end
             %TODO: Font size, color, how to place
