@@ -25,7 +25,7 @@ classdef render_options
         ax = []
         
         apply_transforms = true
-
+        apply_viewbox = true
     end
 
     methods
