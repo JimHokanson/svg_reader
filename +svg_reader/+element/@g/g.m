@@ -39,6 +39,18 @@ classdef g < svg_reader.element
             index = (1:length(class_name))';
             obj.t = table(index,class_name,id);
         end
+        function out = getElementsSummary(obj,parent_path)
+            class_names = obj.t.class_name;
+            out = {};
+            for i = 1:length(obj.children)
+                child = obj.children{i};
+                name_path = [parent_path '.' class_names{i}];
+                out = [out {child name_path}]; %#ok<AGROW> 
+                if isa(child,'svg_reader.element.g')
+                    out = [out child.getElementsSummary(name_path)]; %#ok<AGROW> 
+                end
+            end
+        end
         function out = getElementsOfType(obj,element_type)
 
             mask = strcmp(obj.t.class_name,element_type);
