@@ -53,15 +53,7 @@ classdef image < svg_reader.element
             %   Don't worry about for now
 
             
-            data = obj.getImageData();
-
-            if isfield(obj.attributes,'transform')
-                data = obj.attributes.transform.applyImageTransform(data);
-                [x,y] = obj.attributes.transform.applyTransform(0,0); 
-            end
-
-            %x = 0:(size(data,2)-1);
-            %y = 0:(size(data,1)-1);
+            [data,x,y] = obj.getImageData('apply_transform',render_options.apply_transforms);
             obj.h_image = image(x,y,data);
         end
         function hide(obj)
@@ -74,7 +66,19 @@ classdef image < svg_reader.element
                 obj.h_image.Visible = 'on';
             end
         end
-        function data = getImageData(obj)
+        function [data,x,y] = getImageData(obj,varargin)
+            %
+            %   [data,x,y] = getImageData(obj,varargin)
+            %
+            %   Optional Inputs
+            %   ---------------
+            %   apply_transform : default true
+            %       If false the raw image is returned. 
+            %       If true, the image is returned after being transformed,
+            %       if a transform exists.
+
+            in.apply_transform = true;
+            in = svg_reader.utils.processVarargin(in,varargin);
             %TODO: This should be cached locally
             %in hidden property
             switch obj.format
@@ -87,6 +91,16 @@ classdef image < svg_reader.element
                     delete(file_path)
                 otherwise
                     error('Not yet handled')
+            end
+
+            if in.apply_transform
+                data = obj.attributes.transform.applyImageTransform(data);
+                [x,y] = obj.attributes.transform.applyTransform(0,0); 
+            else
+                %x = 0:(size(data,2)-1);
+                %y = 0:(size(data,1)-1);
+                x = 0;
+                y = 0;
             end
 
         end
