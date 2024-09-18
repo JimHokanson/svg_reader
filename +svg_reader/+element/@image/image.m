@@ -94,8 +94,25 @@ classdef image < svg_reader.element
             end
 
             if in.apply_transform
+                ny = size(data,1);
+                nx = size(data,2);
+
+                %?? don't transform the image, just the x and y?
                 data = obj.attributes.transform.applyImageTransform(data);
+
+                xin = 0:(nx-1);
+                yin = 0:(ny-1);
+
                 [x,y] = obj.attributes.transform.applyTransform(0,0); 
+
+
+                    
+                %1680
+                %1298
+                %[x,~] = obj.attributes.transform.applyTransform(xin,0); 
+                %[~,y] = obj.attributes.transform.applyTransform(0,yin); 
+
+
             else
                 %x = 0:(size(data,2)-1);
                 %y = 0:(size(data,1)-1);
