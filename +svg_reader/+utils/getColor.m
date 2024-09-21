@@ -1,5 +1,12 @@
 function color = getColor(s,type,obj)
 %
+%   This function retrieves the color based on the attributes
+%   structure. It handles my understanding of defaults
+%
+%   color = svg_reader.utils.getColor(s,type,obj)
+%
+%   Inputs
+%   ------
 %   s : struct
 %   type
 %       - stroke
