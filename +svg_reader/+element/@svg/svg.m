@@ -82,8 +82,12 @@ classdef svg < svg_reader.element
             %   out = obj.getElementsOfType('image')
 
             out = {};
+            class_names = obj.t.class_name;
             for i = 1:length(obj.children)
                 child = obj.children{i};
+                if strcmp(class_names{i},element_type)
+                    out = [out {child}]; %#ok<AGROW>
+                end
                 temp = child.getElementsOfType(element_type);
                 out = [out temp]; %#ok<AGROW>
             end
