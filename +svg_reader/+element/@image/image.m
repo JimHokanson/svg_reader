@@ -53,8 +53,17 @@ classdef image < svg_reader.element
             %   Don't worry about for now
 
             
-            [data,x,y] = obj.getImageData('apply_transform',render_options.apply_transforms);
-            obj.h_image = image(x,y,data);
+            [data,x,y] = obj.getImageData('apply_transform',...
+                render_options.apply_transforms);
+            
+            %MATLAB defines pixel centers, not their starting edge
+            %whereas SVG appears to use starting edges
+            %
+            %   If we don't add 0.5 then the images don't align
+            %   with paths
+
+            obj.h_image = image(x+0.5,y+0.5,data);
+            %Change XData and YData
         end
         function hide(obj)
             if ~isempty(obj.h_image) && isvalid(obj.h_image)
@@ -92,6 +101,29 @@ classdef image < svg_reader.element
                 otherwise
                     error('Not yet handled')
             end
+
+            %svg_reader.attr.transform
+            %
+            %Both are required:
+            %https://developer.mozilla.org/en-US/docs/Web/SVG/Element/image
+            h1 = str2double(obj.attributes.height);
+            w1 = str2double(obj.attributes.width);
+
+            h2 = size(data,1);
+            w2 = size(data,2);
+
+            if h1 ~= h2 || w1 ~= w2
+                scale_x = h1/h2;
+                scale_y = w1/w2;
+                trans_string = sprintf('scale(%0.6f %0.6f)',scale_x,scale_y);
+                %TODO: Could have option to load commands directly
+                %rather than parsing a string
+                trans_obj = svg_reader.attr.transform(trans_string);
+                data = trans_obj.applyImageTransform(data);
+            end
+
+
+
 
             if in.apply_transform
                 ny = size(data,1);
