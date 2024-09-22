@@ -53,7 +53,16 @@ p_root = fileparts(file_path);
 root_node = xml_doc.getDocumentElement();
 svg = svg_reader.element.svg(root_node,file_path,read_options);
 
-%propogate style?
-svg.applyStyle([]);
+%propogates styles
+
+%HACK: defs
+defs = svg.getElementsOfType('defs');
+if ~isempty(defs)
+    style = defs.getElementsOfType('style');
+else
+    style = [];
+end
+
+svg.applyStyle(style);
 
 end

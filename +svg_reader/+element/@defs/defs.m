@@ -1,13 +1,6 @@
-classdef g < svg_reader.element
-    %
-    %   Class:
-    %   svg_reader.element.g
-    %
-    %   Group element. This is used by Illustrator to indicate a layer.
-    %
-    %   See Also
-    %   --------
-    %   svg_reader.element.svg
+classdef defs < svg_reader.element
+    %UNTITLED10 Summary of this class goes here
+    %   Detailed explanation goes here
 
     properties
         parent
@@ -17,7 +10,7 @@ classdef g < svg_reader.element
     end
 
     methods
-        function obj = g(item,parent,read_options)
+        function obj = defs(item,parent,read_options)
             obj.parent = parent;
             obj.getAttributes(item)
             s = obj.attributes;
@@ -39,18 +32,6 @@ classdef g < svg_reader.element
             index = (1:length(class_name))';
             obj.t = table(index,class_name,id);
         end
-        function out = getElementsSummary(obj,parent_path)
-            class_names = obj.t.class_name;
-            out = {};
-            for i = 1:length(obj.children)
-                child = obj.children{i};
-                name_path = [parent_path '.' class_names{i}];
-                out = [out {child name_path}]; %#ok<AGROW> 
-                if isa(child,'svg_reader.element.g')
-                    out = [out child.getElementsSummary(name_path)]; %#ok<AGROW> 
-                end
-            end
-        end
         function out = getElementsOfType(obj,element_type)
 
             mask = strcmp(obj.t.class_name,element_type);
@@ -67,22 +48,13 @@ classdef g < svg_reader.element
             out = [out{:}];
         end
         function render(obj,render_options)
-            for i = 1:length(obj.children)
-                child = obj.children{i};
-                child.render(render_options);
-            end
-        end
-        function hide(obj)
-            for i = 1:length(obj.children)
-                child = obj.children{i};
-                child.hide();
-            end            
-        end
-        function show(obj)
-            for i = 1:length(obj.children)
-                child = obj.children{i};
-                child.show();
-            end
+            %NOOP
+
+            %
+            % for i = 1:length(obj.children)
+            %     child = obj.children{i};
+            %     child.render(render_options);
+            % end
         end
     end
 end

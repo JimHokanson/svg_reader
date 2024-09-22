@@ -57,52 +57,87 @@ classdef style < svg_reader.element
             %/* */  <- seen in wild
             %// too?
 
+            % Initialize containers for unique selectors
+            id_map = containers.Map();
+            class_map = containers.Map();
+            element_map = containers.Map();
+
+            % Clean up the style value
             style_value = obj.raw_value;
-            %TODO: Not sure if this works for anything complicated
-            style_value = regexprep(style_value,'/\*.*?\*/','');
-            style_value = regexprep(style_value,'^\s*//.*?$','','lineanchors');
 
+            % Remove comments
+            style_value = regexprep(style_value, '/\*.*?\*/', ''); % Removes block comments /* */
+            style_value = regexprep(style_value, '^\s*//.*?$', '', 'lineanchors'); % Removes line comments //
 
-            results = regexp(style_value,'([^{]+){([^}]+)}','tokens');
+            % Extract the selectors and attributes
+            results = regexp(style_value, '([^{}]+)\s*\{([^}]+)\}', 'tokens');
             n_results = length(results);
-            names = cell(1,n_results);
-            type = zeros(1,n_results);
-            %0 - id
-            %1 - class
-            %2 - element
-            is_class = false(1,n_results);
-            styles = cell(1,n_results);
+
             for i = 1:n_results
                 result = results{i};
-                %1: name
-                %2: attributes
-                temp = strtrim(result{1});
-                if temp(1) == '.'
-                    %class
-                    type(i) = 1;
-                    names{i} = temp(2:end);
-                elseif temp(1) == '#'
-                    %ID
-                    names{i} = temp(2:end);
-                else
-                    %element
-                    if any(temp == ' ')
-                        error('Unhandled case')
+                % Split multiple selectors by commas
+                selectors = strtrim(split(result{1}, ','));
+                attributes = result{2};
+
+                % Get the style attributes for this rule
+                new_style = svg_reader.utils.getStyleAttributes(attributes);
+
+                for j = 1:length(selectors)
+                    temp = strtrim(selectors{j});
+                    if isempty(temp)
+                        continue;
+                    end
+
+                    if temp(1) == '.'
+                        % Class selector
+                        class_name = temp(2:end); % Remove the leading '.'
+                        if isKey(class_map, class_name)
+                            % Merge with existing styles
+                            class_map(class_name) = h__mergeStructures(class_map(class_name), new_style);
+                        else
+                            % Add new class style
+                            class_map(class_name) = new_style;
+                        end
+
+                    elseif temp(1) == '#'
+                        % ID selector
+                        id_name = temp(2:end); % Remove the leading '#'
+                        if isKey(id_map, id_name)
+                            % Merge with existing styles
+                            id_map(id_name) = h__mergeStructures(id_map(id_name), new_style);
+                        else
+                            % Add new ID style
+                            id_map(id_name) = new_style;
+                        end
+
                     else
-                        names{i} = temp;
-                        type(i) = 2;
+                        % Element selector
+                        if any(temp == ' ')
+                            error('Unhandled case');
+                        else
+                            element_name = temp;
+                            if isKey(element_map, element_name)
+                                % Merge with existing styles
+                                element_map(element_name) = h__mergeStructures(element_map(element_name), new_style);
+                            else
+                                % Add new element style
+                                element_map(element_name) = new_style;
+                            end
+                        end
                     end
                 end
-
-                styles{i} = svg_reader.utils.getStyleAttributes(result{2});
             end
 
-            obj.id_names = names(type == 0);
-            obj.id_styles = styles(type == 0);
-            obj.class_names = names(type == 1);
-            obj.class_styles = styles(type == 1);
-            obj.element_names = names(type == 2);
-            obj.element_styles = styles(type == 2);
+            % Convert maps to arrays
+            obj.id_names = keys(id_map);
+            obj.id_styles = values(id_map);
+
+            obj.class_names = keys(class_map);
+            obj.class_styles = values(class_map);
+
+            obj.element_names = keys(element_map);
+            obj.element_styles = values(element_map);
+
         end
         function [s,changed_fields] = mergeStyles(obj,s,elem)
             %
@@ -189,4 +224,13 @@ classdef style < svg_reader.element
             %   svg_reader.element.applyStyle
         end
     end
+end
+
+% Helper function to merge two structures (style attributes)
+function merged = h__mergeStructures(old_style, new_style)
+fields_new = fieldnames(new_style);
+merged = old_style;
+for k = 1:length(fields_new)
+    merged.(fields_new{k}) = new_style.(fields_new{k});
+end
 end

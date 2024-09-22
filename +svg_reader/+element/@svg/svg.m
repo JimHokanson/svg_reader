@@ -77,6 +77,11 @@ classdef svg < svg_reader.element
             %
             %   out = getElementsOfType(obj,element_type)
             %
+            %   Outputs
+            %   -------
+            %   out : array 
+            %       
+            %
             %   Example
             %   -------
             %   out = obj.getElementsOfType('image')
@@ -89,6 +94,9 @@ classdef svg < svg_reader.element
                     out = [out {child}]; %#ok<AGROW>
                 end
                 temp = child.getElementsOfType(element_type);
+                if ~iscell(temp)
+                    temp = {temp};
+                end
                 out = [out temp]; %#ok<AGROW>
             end
             out = [out{:}];

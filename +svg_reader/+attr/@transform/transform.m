@@ -36,7 +36,7 @@ classdef transform < handle
             matches = regexp(input_str,'([^\(]+)\(([^\)]+)\)','tokens');
 
             %Note #s after decimal are optional
-            number_pattern = '-?\d+\.?\d*';
+            number_pattern = '-?\d*\.?\d*';
 
             n_matches = length(matches);
             commands = cell(1,n_matches);
@@ -74,7 +74,18 @@ classdef transform < handle
                     case 'rotate'
                         keyboard
                     case 'scale'
-                        keyboard
+                        if length(inputs) == 1
+                            scale_x = inputs;
+                            scale_y = inputs;
+                        elseif length(inputs) == 2
+                            scale_x = inputs(1);
+                            scale_y = inputs(2);
+                        else
+                            error('Unexpected # of inputs')
+                        end
+                        T = [scale_x 0 0; 0 scale_y 0; 0 0 1];
+                        tform = affinetform2d(T);
+                        data = imwarp(data, tform);
                     case 'skewX'
                         keyboard
                     case 'skewY'
@@ -113,13 +124,39 @@ classdef transform < handle
                     case 'rotate'
                         keyboard
                     case 'scale'
-                        keyboard
+                        %https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform#scale
+                        if length(inputs) == 1
+                            scale_x = inputs;
+                            scale_y = inputs;
+                        elseif length(inputs) == 2
+                            scale_x = inputs(1);
+                            scale_y = inputs(2);
+                        else
+                            error('Unexpected # of inputs')
+                        end
+                        a = scale_x;
+                        d = scale_y;
+                        x_new = a*x;
+                        y_new = d*y;
+                        x = x_new;
+                        y = y_new;
                     case 'skewX'
                         keyboard
                     case 'skewY'
                         keyboard
                     case 'translate'
-                        keyboard
+                        %https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform#translate
+                        if length(inputs) == 1
+                            trans_x = inputs;
+                            trans_y = inputs;
+                        elseif length(inputs) == 2
+                            trans_x = inputs(1);
+                            trans_y = inputs(2);
+                        else
+                            error('Unexpected # of inputs')
+                        end
+                        x = x + trans_x;
+                        y = y + trans_y;
                     otherwise
                         error('Unexpected case')
                 end

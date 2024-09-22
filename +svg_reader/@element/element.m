@@ -71,8 +71,14 @@ classdef element < handle
                     local_style = obj.children{I};
                     %TODO: Do we need to merge with any svg style attribute?
                     if nargin == 2 && ~isempty(parent_style)
-                        %Should merge here if this is the case
-                        error('unhandled case')
+                        if local_style == parent_style
+                            %Same instance, do nothing
+
+                            %For style in defs object
+                        else
+                            %Should merge here if this is the case
+                            error('unhandled case')
+                        end
                     end
                     style_use = local_style;
                 elseif length(I) > 1
@@ -89,7 +95,12 @@ classdef element < handle
                 %   are passed down
                 s = obj.attributes;
                 %Call to svg_reader.element.style.mergeStyles
-                [s,changed_fields] = style_use.mergeStyles(s,obj);
+                try
+                    [s2,changed_fields] = style_use.mergeStyles(s,obj);
+                catch
+                    keyboard
+                end
+                s = s2;
                 obj.attributes = s;
                 if ~isempty(changed_fields)
                     obj.updateAttributes(changed_fields);

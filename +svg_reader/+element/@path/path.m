@@ -1,7 +1,7 @@
 classdef path < svg_reader.element
     %
     %   Class
-    %   svg_reader.element.path
+    %   svg_reader.elediteditement.path
     %
     %   https://developer.mozilla.org/en-US/docs/Web/SVG/Element/path
 

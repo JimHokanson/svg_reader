@@ -21,6 +21,9 @@ for i = 1:n
         case '#comment'
             child_obj = [];
             keep_mask(i) = false;
+        case 'defs'
+            %[defs: null]
+            child_obj = svg_reader.element.defs(item,parent,read_options);
         case 'desc'
             child_obj = svg_reader.element.desc(item,parent,read_options);
         case 'ellipse'
